@@ -2214,28 +2214,37 @@ function cleanSB(text){
 function toNum(str){ return parseCount(String(str).replace(/\s/g,'').replace(/,/g,'')); }
 function parseSBPage(text){
   const t=cleanSB(text);
-  const WORD='(?:subscribers|followers|フォロワー|登録者)';
-  let approx=null;
-  const m1=t.match(new RegExp(WORD+'[^\\d]{0,30}?([\\d][\\d,\\.]*\\s*[KMB万]?)','i'));
-  const m2=t.match(new RegExp('([\\d][\\d,\\.]*\\s*[KMB万]?)\\s*'+WORD,'i'));
-  for(const m of [m1,m2]){ if(m){ const n=toNum(m[1]); if(n){ approx=n; break; } } }
-  if(!approx) return null;
-
-  // 日別表の行から候補を集める（K表記も拾う）
-  const rows=t.split(/\n/).filter(l=>/\d{4}-\d{2}-\d{2}/.test(l));
-  const cand=[];
-  [rows[0], rows[rows.length-1]].filter(Boolean).forEach(r=>{
-    [...String(r).matchAll(/([\d][\d,\.]*\s*[KMB万]?)/g)].forEach(m=>{
-      const v=toNum(m[1]);
-      if(v && Math.abs(v-approx)/approx <= 0.10) cand.push(v);
-    });
+  const fromTable=parseSBTable(t);      // ① 日別表（一番正確）
+  const approx=parseSBHeader(t);        // ② 見出しの概数（表が無いページ用）
+  if(fromTable) return {n:fromTable, exact:true, approx:approx||fromTable};
+  if(approx) return {n:approx, exact:false, approx};
+  return null;
+}
+/* 日別表：| 日付 | 増減 | 実数 | … の並び。実数は必ず3つ目のセル */
+function parseSBTable(t){
+  const rows=t.split(/\n/).filter(l=>/^\s*\|/.test(l) && /\d{4}-\d{2}-\d{2}/.test(l));
+  let best=null, bestDate='';
+  rows.forEach(r=>{
+    const dm=r.match(/(\d{4}-\d{2}-\d{2})/); if(!dm) return;
+    const cells=r.split('|').map(x=>x.trim());
+    while(cells.length && cells[0]==='') cells.shift();
+    while(cells.length && cells[cells.length-1]==='') cells.pop();
+    const v=toNum(cells[2]||'');
+    if(v && dm[1]>=bestDate){ bestDate=dm[1]; best=v; }
   });
-  if(cand.length){
-    cand.sort((a,b)=>Math.abs(a-approx)-Math.abs(b-approx));
-    if(cand[0]!==approx) return {n:cand[0], exact:true, approx};
-    return {n:cand[0], exact:false, approx};
-  }
-  return {n:approx, exact:false, approx};
+  return best;
+}
+/* 見出し：「Followers 5.04K」など。「for the last 14 days」の類は先に取り除く */
+function parseSBHeader(t){
+  const clean=t
+    .replace(/(?:followers|subscribers|likes|views|uploads)\s+for\s+the\s+last[^\n]*/gi,' ')
+    .replace(/last\s+\d+\s+days/gi,' ')
+    .replace(/gained\s+(?:followers|likes|subscribers)[^\n]*/gi,' ');
+  const WORD='(?:subscribers|followers|フォロワー|登録者)';
+  const m1=clean.match(new RegExp(WORD+'[^\\d]{0,30}?([\\d][\\d,\\.]*\\s*[KMB万]?)','i'));
+  const m2=clean.match(new RegExp('([\\d][\\d,\\.]*\\s*[KMB万]?)\\s*'+WORD,'i'));
+  for(const m of [m1,m2]){ if(m){ const n=toNum(m[1]); if(n) return n; } }
+  return null;
 }
 function openBridge(task){
   if(!S.project){ toast('先にプロジェクトを開いてください'); return; }
