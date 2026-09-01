@@ -1,0 +1,2811 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AI会議">
+<meta name="theme-color" content="#191713">
+<title>AI会議 / AI Conference Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#191713;
+  --panel:#232019;
+  --panel2:#2C281F;
+  --line:#3B362B;
+  --tape:#E9E2CE;
+  --amber:#E0A32E;
+  --tally:#C4453A;
+  --text:#DCD5C6;
+  --dim:#8B8271;
+  --font-ui:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  --font-lab:"DM Mono",ui-monospace,"SFMono-Regular",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--ink);
+  color:var(--text);
+  font-family:var(--font-ui);
+  font-size:14px;line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit}
+input,textarea,select{
+  font-family:inherit;font-size:14px;color:var(--text);
+  background:#16140F;border:1px solid var(--line);border-radius:2px;
+  padding:9px 11px;width:100%;
+}
+textarea{line-height:1.7;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--amber);outline-offset:1px;border-color:var(--amber)}
+button:focus-visible,.lamp:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+label{display:block}
+.lab{
+  font-family:var(--font-lab);font-size:10.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--dim);margin-bottom:6px;
+}
+.btn{
+  background:var(--panel2);color:var(--text);border:1px solid var(--line);
+  border-radius:2px;padding:9px 16px;cursor:pointer;
+  font-size:13px;font-weight:500;letter-spacing:.02em;transition:.15s;
+}
+.btn:hover{background:#38321F;border-color:var(--amber);color:#F3ECDC}
+.btn.primary{background:var(--amber);border-color:var(--amber);color:#1A1509;font-weight:700}
+.btn.primary:hover{background:#F0B440}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.sm{padding:5px 10px;font-size:12px}
+.screen{display:none}
+.screen.on{display:block}
+
+/* ---------- 起動画面 ---------- */
+.boot{max-width:760px;margin:0 auto;padding:56px 24px 80px}
+.mark{font-family:var(--font-lab);font-size:11px;letter-spacing:.3em;color:var(--amber)}
+.boot h1{
+  font-size:clamp(30px,6vw,52px);font-weight:900;letter-spacing:-.02em;
+  margin:10px 0 6px;line-height:1.15;
+}
+.boot .sub{color:var(--dim);margin:0 0 34px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:20px;margin-bottom:14px}
+.card h2{font-size:15px;margin:0 0 4px;font-weight:700}
+.card p.note{color:var(--dim);font-size:12.5px;margin:0 0 14px}
+.rootline{
+  font-family:var(--font-lab);font-size:12px;color:var(--amber);
+  background:#16140F;border:1px dashed var(--line);padding:8px 10px;margin-bottom:12px;
+  word-break:break-all;
+}
+.plist{list-style:none;margin:0;padding:0}
+.plist li{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  border-bottom:1px solid var(--line);padding:10px 2px;
+}
+.plist li:last-child{border-bottom:0}
+.plist .pn{font-weight:700}
+.plist .pd{font-family:var(--font-lab);font-size:11px;color:var(--dim)}
+.empty{color:var(--dim);font-size:13px;padding:14px 2px}
+
+/* ---------- ウィザード ---------- */
+.wiz{max-width:760px;margin:0 auto;padding:40px 24px 90px}
+.steps{display:flex;gap:6px;margin-bottom:26px;flex-wrap:wrap}
+.step{
+  font-family:var(--font-lab);font-size:10.5px;letter-spacing:.1em;color:var(--dim);
+  border-bottom:2px solid var(--line);padding-bottom:6px;flex:1;min-width:88px;
+}
+.step.on{color:var(--amber);border-color:var(--amber)}
+.step.done{color:var(--text);border-color:var(--text)}
+.wizpane{display:none}
+.wizpane.on{display:block}
+.wizpane h2{font-size:22px;font-weight:900;margin:0 0 4px}
+.wizpane .hint{color:var(--dim);font-size:12.5px;margin:0 0 18px;white-space:pre-line}
+.field{margin-bottom:16px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.navbtns{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap}
+.eg{
+  border-left:2px solid var(--line);padding:2px 0 2px 12px;margin:0 0 14px;
+  color:var(--dim);font-size:12.5px;white-space:pre-line;
+}
+
+/* ---------- 会議画面 ---------- */
+.deck{padding:14px 16px 40px;max-width:1900px;margin:0 auto}
+.topbar{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:14px;
+  border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:14px;flex-wrap:wrap;
+}
+.proj{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.proj .nm{font-size:22px;font-weight:900;letter-spacing:-.01em}
+.proj .path{font-family:var(--font-lab);font-size:11px;color:var(--dim);word-break:break-all}
+.topacts{display:flex;gap:8px;flex-wrap:wrap}
+.keybar{
+  background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:12px 14px;margin-bottom:14px;
+  display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;
+}
+.keybar > div:first-child{flex:1 1 300px;min-width:220px}
+.keybar .btn{flex:none}
+.keybar.warn{border-color:var(--amber)}
+.keybar.over{border-color:var(--tally)}
+.keybar.over .u b{color:#E8867C}
+.chcost{font-family:var(--font-lab);font-size:10px;color:var(--dim);margin-top:6px;letter-spacing:.04em}
+.ratetbl{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:12px}
+.ratetbl th{font-family:var(--font-lab);font-size:10px;letter-spacing:.12em;color:var(--dim);text-align:left;padding:4px 6px;font-weight:400}
+.ratetbl td{padding:3px 6px;border-top:1px solid var(--line)}
+.ratetbl input{padding:4px 7px;font-family:var(--font-lab);font-size:12px}
+.ratetbl td.mn{font-family:var(--font-lab);font-size:11.5px;word-break:break-all}
+.keybar .u{font-family:var(--font-lab);font-size:11px;color:var(--dim);white-space:nowrap;line-height:1.5}
+.keybar .u b{color:var(--amber);font-size:15px}
+
+.meters{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.meter{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:9px 11px}
+.meter .lab{margin-bottom:3px}
+.meter .num{font-family:var(--font-lab);font-size:19px;color:var(--amber);line-height:1.2}
+.meter input{padding:3px 6px;font-size:12px;font-family:var(--font-lab);margin-top:4px}
+.meter .btn{margin-top:5px;width:100%}
+.mstat{font-family:var(--font-lab);font-size:10px;color:var(--dim);margin-top:6px;line-height:1.5}
+.mstat b{color:var(--text);font-weight:500}
+.mstat .up{color:#7FBF6A}
+.mstat .dn{color:#E8867C}
+.meterall{grid-column:1/-1;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sbrow{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.sbrow a{color:var(--amber);font-family:var(--font-lab);font-size:11px;text-decoration:none;border-bottom:1px solid rgba(224,163,46,.4)}
+.sbrow a:hover{color:#F3D18A}
+.sbrow span{font-family:var(--font-lab);font-size:10.5px;color:var(--dim);letter-spacing:.1em}
+.bridgetabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.ops{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:10px}
+.ops th{font-family:var(--font-lab);font-size:9.5px;letter-spacing:.12em;color:var(--dim);text-align:left;padding:4px 5px;font-weight:400}
+.ops td{padding:3px 5px;border-top:1px solid var(--line);vertical-align:middle}
+.ops input,.ops select{padding:4px 7px;font-size:12.5px}
+.ops .del{background:none;border:0;color:var(--dim);cursor:pointer;font-size:15px;padding:0 4px}
+.ops .del:hover{color:var(--tally)}
+.opspane{display:none}
+.opspane.on{display:block}
+.opshint{color:var(--dim);font-size:12px;margin:0 0 12px;line-height:1.7}
+.bridgetabs .btn.on{background:var(--amber);border-color:var(--amber);color:#1A1509;font-weight:700}
+.agenda{
+  display:grid;grid-template-columns:1fr 260px;gap:12px;
+  background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:14px;margin-bottom:14px;
+}
+.stamp{font-family:var(--font-lab);font-size:12px;color:var(--dim);line-height:1.9}
+.stamp b{color:var(--text);font-weight:500}
+
+.userbox{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:14px;margin-bottom:16px}
+.userbox.drag{border-color:var(--amber);background:#2B2617}
+.dropnote{font-size:11.5px;color:var(--dim);margin-top:8px}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.thumb{position:relative;width:64px;height:64px;border:1px solid var(--line)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb button{
+  position:absolute;top:-7px;right:-7px;width:18px;height:18px;border-radius:50%;
+  background:var(--tally);color:#fff;border:0;cursor:pointer;font-size:11px;line-height:1;
+}
+.sendrow{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+
+.console{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.ch{background:var(--panel);border:1px solid var(--line);border-radius:3px;display:flex;flex-direction:column;min-height:520px}
+.ch.host{border-color:#6A3A2E}
+.chtabs{display:none;gap:6px;margin-bottom:10px}
+.chtabs button{flex:1;padding:9px 4px;font-size:12px;background:var(--panel2);color:var(--dim);
+  border:1px solid var(--line);border-radius:2px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chtabs button.on{background:var(--amber);border-color:var(--amber);color:#1A1509;font-weight:700}
+@media (max-width:700px){ .chtabs{display:flex} }
+.offbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.offbar:empty{display:none}
+.ch.off{opacity:.45}
+.ch.off .chlog,.ch.off .chfoot{filter:grayscale(1)}
+.chhead{padding:10px 12px;border-bottom:1px solid var(--line);background:var(--panel2)}
+.tapewrap{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.tape{
+  background:var(--tape);color:#211E17;font-family:var(--font-lab);font-size:11px;
+  letter-spacing:.08em;padding:3px 9px;transform:rotate(-.5deg);flex:1;
+  box-shadow:0 1px 0 rgba(0,0,0,.35);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.lamp{
+  width:13px;height:13px;border-radius:50%;background:#3A342A;border:1px solid #4A4335;
+  cursor:pointer;flex:none;padding:0;
+}
+.lamp.on{background:var(--tally);box-shadow:0 0 9px rgba(196,69,58,.85);border-color:#E06A5E}
+.lamp.live{animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.lamp.live{animation:none}}
+.chgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px}
+.chhead input,.chhead select{padding:5px 8px;font-size:12px}
+.chlog{flex:1;overflow-y:auto;padding:12px;max-height:46vh;min-height:180px}
+.msg{margin-bottom:12px;font-size:13px}
+.msg .who{font-family:var(--font-lab);font-size:10px;letter-spacing:.14em;color:var(--dim);margin-bottom:3px}
+.msg.u .who{color:var(--amber)}
+.msg .bd{white-space:pre-wrap;word-break:break-word}
+.msg.u .bd{border-left:2px solid var(--amber);padding-left:9px;color:#EFE7D6}
+.msg.err .bd{color:#E8867C;border-left:2px solid var(--tally);padding-left:9px}
+.chfoot{border-top:1px solid var(--line);padding:9px}
+.chfoot textarea{min-height:62px;font-size:13px}
+.chfoot .sendrow{margin-top:7px}
+.sig{height:2px;background:var(--line);margin-top:7px;overflow:hidden}
+.sig i{display:block;height:100%;width:30%;background:var(--amber);transform:translateX(-100%)}
+.ch.busy .sig i{animation:slide 1.2s linear infinite}
+@keyframes slide{to{transform:translateX(420%)}}
+@media (prefers-reduced-motion:reduce){.ch.busy .sig i{animation:none;transform:none;width:100%}}
+
+.modal{position:fixed;inset:0;background:rgba(10,9,7,.86);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+.modal.on{display:flex}
+.modalbox{background:var(--panel);border:1px solid var(--line);max-width:860px;width:100%;max-height:88vh;overflow:auto;padding:22px;border-radius:3px}
+.modalbox h2{margin:0 0 10px;font-size:19px;font-weight:900}
+.modalbox textarea{min-height:44vh;font-size:13px}
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translateX(-50%);
+  background:var(--tape);color:#1D1A14;padding:10px 18px;border-radius:2px;
+  font-size:13px;font-weight:700;display:none;z-index:60;max-width:90vw;
+}
+.toast.on{display:block}
+#printArea{display:none}
+@media (max-width:700px){
+  body{font-size:15px}
+  .deck{padding:10px 10px 30px}
+  .topacts .btn{padding:8px 11px;font-size:12px}
+  .chlog{max-height:44vh}
+  input,textarea,select{font-size:16px}
+  .modalbox{padding:16px}
+  .ops td,.ops th{padding:2px 3px}
+}
+@media (max-width:980px){
+  .console{grid-template-columns:1fr}
+  .agenda{grid-template-columns:1fr}
+  .meters{grid-template-columns:1fr 1fr}
+  .chlog{max-height:38vh}
+}
+@media print{
+  body{background:#fff;color:#000}
+  .screen,.modal,.toast{display:none !important}
+  #printArea{display:block !important;font-size:12px}
+  #printArea h1{font-size:19px}
+  #printArea pre{white-space:pre-wrap;font-family:var(--font-ui);line-height:1.75;font-size:11.5px;margin:0}
+  #printArea pre.brk{page-break-before:always;break-before:page}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ 1. 起動画面 ============ -->
+<section class="screen on" id="s-boot">
+  <div class="boot">
+    <div class="mark">AI CONFERENCE DESK</div>
+    <h1>AI会議</h1>
+    <p class="sub">3つのAIを1つの卓に並べて、プロジェクトの会議をする。</p>
+
+    <div class="card">
+      <h2>1. 保存先を選ぶ</h2>
+      <p class="note">選んだ場所に「AI会議」フォルダを作り、その中にプロジェクトごとのフォルダ・憲章・議事録を保存します。</p>
+      <div class="rootline" id="rootLine">保存先は未選択です</div>
+      <button class="btn primary" id="btnPickRoot">保存先フォルダを選ぶ</button>
+      <button class="btn ghost" id="btnResume" style="display:none">前回の保存先を使う</button>
+    </div>
+
+    <div class="card">
+      <h2>iPhone・iPadとのやりとり</h2>
+      <p class="note">プロジェクトを1つのファイルに書き出して、iCloud Drive経由で行き来できます。取り込むときは、新しい情報だけが足され、既存のデータは消えません。</p>
+      <div class="navbtns" style="margin-top:0">
+        <button class="btn" id="btnExport">開いているプロジェクトを書き出す</button>
+        <button class="btn" id="btnImport">ファイルから取り込む</button>
+        <input type="file" id="impIn" accept=".json,application/json" style="display:none">
+      </div>
+      <div class="rootline" id="syncNote" style="margin-top:12px">プロジェクトを開いてから書き出してください。</div>
+    </div>
+
+    <div class="card">
+      <h2>2. プロジェクトを開く</h2>
+      <p class="note">過去に保存したプロジェクトを読み出します。</p>
+      <ul class="plist" id="projList"></ul>
+      <div class="empty" id="projEmpty">まだプロジェクトがありません。</div>
+      <div style="margin-top:14px"><button class="btn primary" id="btnNewProj">新しいプロジェクトを作る</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. 議題の呼び出し ============ -->
+<section class="screen" id="s-agenda">
+  <div class="boot">
+    <div class="mark">AGENDA</div>
+    <h1 id="agProjName">プロジェクト</h1>
+    <p class="sub">続きから始める議題を選ぶか、新しい議題を立てます。</p>
+    <div class="card">
+      <h2>過去の議題</h2>
+      <p class="note">選ぶと、憲章と前回の議事録を読み込んだ状態で会議を再開できます。</p>
+      <ul class="plist" id="agList"></ul>
+      <div class="empty" id="agEmpty">まだ議題がありません。</div>
+    </div>
+    <div class="card">
+      <h2>いまの状況（3つのAI全員がこれを読んだ状態で会議に入ります）</h2>
+      <p class="note">これまでの決定事項とSNSの数字です。進行役が読み上げなくても、全員が把握しています。</p>
+      <div class="rootline" id="agSns" style="margin-bottom:12px">—</div>
+      <div id="agDecisions" style="font-size:13px;white-space:pre-wrap;max-height:260px;overflow:auto;border-left:2px solid var(--line);padding-left:12px"></div>
+      <div class="rootline" id="agSchedule" style="margin-top:12px"></div>
+      <div class="navbtns">
+        <button class="btn sm" id="btnEditDecisions">決定事項を編集する</button>
+        <button class="btn sm" id="btnOpsAgenda">運営データを開く</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>AI会議の外で決まったこと・共有事項</h2>
+      <p class="note">打ち合わせ、電話、現場で決まったこと。ここに書いたものは、以後すべての会議で全員が前提として読みます。</p>
+      <textarea id="agExternal" style="min-height:120px" placeholder="例）11/13東京ファイナルの会場をSpotify O-nestで確定（8/28 制作会議）&#10;例）新曲のMV撮影は10月上旬、監督は◯◯さんで内定"></textarea>
+      <div class="navbtns"><button class="btn primary" id="btnSaveExternal">共有事項を保存する</button></div>
+    </div>
+
+    <div class="card">
+      <h2>新しい議題</h2>
+      <div class="field"><label class="lab">今回の議題</label><input id="newAgenda" placeholder="例）武道館ライブについて"></div>
+      <button class="btn primary" id="btnStartAgenda">会議を始める</button>
+      <button class="btn ghost" id="btnBackBoot">戻る</button>
+    </div>
+    <div class="card">
+      <h2>憲章</h2>
+      <p class="note">このプロジェクトの土台。いつでも読み直し・書き直しができます。</p>
+      <button class="btn" id="btnViewCharter">憲章を開く</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. 憲章ウィザード ============ -->
+<section class="screen" id="s-wiz">
+  <div class="wiz">
+    <div class="mark">NEW PROJECT</div>
+    <h1 style="font-size:30px;font-weight:900;margin:8px 0 22px">憲章をつくる</h1>
+    <div class="steps">
+      <div class="step" data-s="0">01 プロジェクト名</div>
+      <div class="step" data-s="1">02 プロフィール</div>
+      <div class="step" data-s="2">03 ホームページ</div>
+      <div class="step" data-s="3">04 SNS</div>
+      <div class="step" data-s="4">05 NG・マスト</div>
+      <div class="step" data-s="5">06 確認</div>
+    </div>
+
+    <div class="wizpane" data-p="0">
+      <h2>プロジェクト名</h2>
+      <p class="hint">保存フォルダの名前にもなります。</p>
+      <div class="field"><input id="w-name" placeholder="例）おっさんバンド"></div>
+      <div class="field">
+        <label class="lab">憲章の保存場所</label>
+        <div class="rootline" id="w-path">保存先フォルダの直下に、この名前のフォルダを作ります</div>
+        <button class="btn sm" id="btnChangeRoot">保存先を選び直す</button>
+      </div>
+
+      <div class="card">
+        <h2>ホストAIを決める</h2>
+        <p class="note">ホストが、あなたの入力とウェブ調査を憲章に落とし込みます。ここで先に決めておきます。</p>
+        <div class="row2">
+          <div><label class="lab">ホストにするAI</label><select id="w-host"></select></div>
+          <div><label class="lab">モデル名</label><input id="w-hostmodel" list="modelList" placeholder="gemini-3.6-flash"></div>
+        </div>
+        <div class="field" style="margin-top:12px">
+          <label class="lab">Gemini APIキー（会議でも共通で使います）</label>
+          <input type="password" id="w-gkey" placeholder="AIza... を貼り付け">
+        </div>
+        <div class="navbtns" style="margin-top:0">
+          <button class="btn sm" id="btnWizModels">モデル一覧を取得</button>
+          <button class="btn sm" id="btnWizTest">接続テスト</button>
+        </div>
+        <div class="rootline" id="w-hoststatus" style="margin-top:12px">APIキーを入れて「接続テスト」を押すと、使えるかどうかその場で確認できます。</div>
+      </div>
+    </div>
+
+    <div class="wizpane" data-p="1">
+      <h2>プロフィール</h2>
+      <p class="hint">誰が、どんな編成で、何をやっているか。</p>
+      <div class="eg">例）おっさんバンドとは、AIが世界を変えるというキャッチコピーで活動するおっさん4人組。きのういたお（ボーカル）を中心に、ひとっこひとり（ギター）、たらればたろう（ベース）、もうしわけつねお（ドラム）という編成で、ジャンルはサイケロック。</div>
+      <div class="field"><textarea id="w-profile" style="min-height:180px"></textarea></div>
+    </div>
+
+    <div class="wizpane" data-p="2">
+      <h2>ホームページ</h2>
+      <p class="hint">なければ空欄のままで大丈夫です。</p>
+      <div class="field"><input id="w-hp" placeholder="https://"></div>
+    </div>
+
+    <div class="wizpane" data-p="3">
+      <h2>SNS</h2>
+      <p class="hint">アカウントのURLを入れてください。なければ空欄のままで大丈夫です。</p>
+      <div class="field"><label class="lab">Instagram</label><input id="w-ig" placeholder="https://www.instagram.com/..."></div>
+      <div class="field"><label class="lab">TikTok</label><input id="w-tt" placeholder="https://www.tiktok.com/@..."></div>
+      <div class="field"><label class="lab">YouTube</label><input id="w-yt" placeholder="https://www.youtube.com/@..."></div>
+      <div class="field"><label class="lab">X</label><input id="w-x" placeholder="https://x.com/..."></div>
+    </div>
+
+    <div class="wizpane" data-p="4">
+      <h2>NG・マスト</h2>
+      <p class="hint">やらないこと、必ず守ること。AIはこれを絶対の前提として扱います。</p>
+      <div class="field">
+        <label class="lab">NG（やらないこと）</label>
+        <div class="eg">例）年齢非公表、出身地非公表</div>
+        <textarea id="w-ng" style="min-height:110px"></textarea>
+      </div>
+      <div class="field">
+        <label class="lab">マスト（必ず守ること）</label>
+        <div class="eg">例）尖った音楽をやること、バズらない音楽をやること、MVは必ず全員参加</div>
+        <textarea id="w-must" style="min-height:110px"></textarea>
+      </div>
+    </div>
+
+    <div class="wizpane" data-p="5">
+      <h2>この内容で憲章を作成しますか？</h2>
+      <p class="hint">「最初からやり直す」を選んでも、入力した内容はそのまま残ります。</p>
+      <div class="card" id="w-summary" style="white-space:pre-wrap;font-size:13px"></div>
+      <div class="card">
+        <h2>解析の設定</h2>
+        <p class="note">ホストがホームページとSNSを調べて、現在のブランディング・年齢層・伸びている投稿・本人たちの発言などを集めて憲章にまとめます。</p>
+        <div class="row2">
+          <div><label class="lab">ホスト</label><div class="rootline" id="w-hostshow" style="margin:0"></div></div>
+          <div><label class="lab">Web検索</label><select id="w-search">
+            <option value="1">使う（推奨）</option>
+            <option value="0">使わない（入力内容だけでまとめる）</option>
+          </select></div>
+        </div>
+      </div>
+      <div class="card" id="wizErr" style="display:none;border-color:#7A3A33">
+        <h2 style="color:#E8867C">うまくいきませんでした</h2>
+        <div id="wizErrMsg" style="font-size:13px;white-space:pre-wrap"></div>
+      </div>
+      <div class="navbtns">
+        <button class="btn primary" id="btnMakeCharter">この内容で憲章を作成する</button>
+        <button class="btn" id="btnCharterNoAI">AIを使わず、入力内容だけで作る</button>
+        <button class="btn ghost" id="btnRestart">最初からやり直す</button>
+      </div>
+    </div>
+
+    <div class="navbtns" id="wizNav">
+      <button class="btn" id="btnPrev">戻る</button>
+      <button class="btn primary" id="btnNext">次へ</button>
+      <button class="btn ghost" id="btnWizCancel">中止する</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. 会議画面 ============ -->
+<section class="screen" id="s-deck">
+  <div class="deck">
+    <div class="topbar">
+      <div class="proj">
+        <div class="nm" id="d-proj">プロジェクト</div>
+        <div class="path" id="d-path"></div>
+      </div>
+      <div class="topacts">
+        <button class="btn" id="btnCharterOpen">憲章</button>
+        <button class="btn" id="btnOpsDeck">運営データ</button>
+        <button class="btn" id="btnHome">プロジェクト一覧</button>
+        <button class="btn" id="btnPrint">印刷 / PDF</button>
+        <button class="btn primary" id="btnSave">保存</button>
+      </div>
+    </div>
+
+    <div class="keybar">
+      <div>
+        <label class="lab">Gemini APIキー（3つの窓で共通）</label>
+        <input type="password" id="gkey" placeholder="AIza... を1回だけ貼り付け">
+      </div>
+      <button class="btn" id="btnModels">モデル一覧を取得</button>
+      <button class="btn" id="btnAllGemini">3窓すべてGeminiにする</button>
+      <div class="u">本日 <b id="costToday">¥0</b><br><span id="usageNum">0</span> 回送信</div>
+      <button class="btn" id="btnRates">料金設定</button>
+    </div>
+
+    <div class="meters" id="meters">
+      <div class="meter"><div class="lab">Instagram</div><div class="num" id="m-ig">—</div>
+        <input id="i-ig" placeholder="フォロワー数">
+        <button class="btn sm" data-fetch="ig">自動取得</button>
+        <div class="mstat" id="s-ig">—</div></div>
+      <div class="meter"><div class="lab">X</div><div class="num" id="m-x">—</div>
+        <input id="i-x" placeholder="フォロワー数">
+        <button class="btn sm" data-fetch="x">手で入力</button>
+        <div class="mstat" id="s-x">—</div></div>
+      <div class="meter"><div class="lab">TikTok</div><div class="num" id="m-tt">—</div>
+        <input id="i-tt" placeholder="フォロワー数">
+        <button class="btn sm" data-fetch="tt">自動取得</button>
+        <div class="mstat" id="s-tt">—</div></div>
+      <div class="meter"><div class="lab">YouTube</div><div class="num" id="m-yt">—</div>
+        <input id="i-yt" placeholder="登録者数">
+        <button class="btn sm" data-fetch="yt">自動取得</button>
+        <div class="mstat" id="s-yt">—</div></div>
+      <div class="meterall"><button class="btn" id="btnAllFollowers">4つまとめて取得</button>
+        <button class="btn" id="btnTrend">推移を表示</button>
+        <button class="btn" id="btnBridge">サブスクAIで調べる</button>
+        <button class="btn" id="btnReport">調査ログを見る</button>
+        <span class="lab" style="margin:0" id="followNote">YouTubeは公式APIで正確に。他の3つはホストAIがウェブで調べます（概算・要確認）。</span></div>
+      <div class="sbrow" id="sbLinks"></div>
+    </div>
+
+    <div class="agenda">
+      <div>
+        <label class="lab">今回の議題</label>
+        <input id="d-agenda" placeholder="例）武道館ライブについて">
+      </div>
+      <div class="stamp" id="d-stamp"></div>
+    </div>
+
+    <div class="userbox" id="userBox">
+      <label class="lab">ユーザー欄 — 3つのAIに同時に伝える</label>
+      <textarea id="u-text" style="min-height:92px" placeholder="議題について話したいことを書いて、送信してください。"></textarea>
+      <div class="thumbs" id="u-thumbs"></div>
+      <div class="dropnote">画像や資料はこの枠にドラッグ＆ドロップできます。3つのAIすべてに渡されます。</div>
+      <div class="sendrow">
+        <button class="btn primary" id="btnUserSend">3つのAIに送信</button>
+        <button class="btn" id="btnAttach">画像・資料を選ぶ</button>
+        <input type="file" id="fileIn" accept="image/*,text/*,.md,.txt,.csv,.json" multiple style="display:none">
+        <button class="btn" id="btnBrief">役割をAIに配る</button>
+        <button class="btn" id="btnTurn1">1ターン進める</button>
+        <button class="btn" id="btnTurn3">3ターン続ける</button>
+        <button class="btn ghost" id="btnStop" style="display:none">止める</button>
+        <span class="lab" style="margin:0" id="turnNote">ユーザー発言のあとは、必ずホストが最初に答えます。</span>
+      </div>
+    </div>
+
+    <div class="chtabs" id="chTabs"></div>
+    <div class="offbar" id="chOff"></div>
+    <div class="console" id="console"></div>
+  </div>
+</section>
+
+<!-- ============ 憲章モーダル ============ -->
+<div class="modal" id="charterModal">
+  <div class="modalbox">
+    <h2>憲章</h2>
+    <p class="note" style="color:var(--dim);font-size:12.5px;margin:0 0 12px">直接書き直せます。保存すると、次の会議から3つのAI全員がこの内容を前提にします。</p>
+    <textarea id="charterText"></textarea>
+    <div class="navbtns">
+      <button class="btn primary" id="btnCharterSave">憲章を保存する</button>
+      <button class="btn" id="btnCharterRegen">AIに作り直してもらう</button>
+      <button class="btn" id="btnCharterBridge">サブスクAIで作り直す</button>
+      <button class="btn ghost" id="btnCharterClose">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 調査ブリッジ ============ -->
+<div class="modal" id="bridgeModal">
+  <div class="modalbox">
+    <h2>サブスクAIで調べて、持ち帰る</h2>
+    <p class="note" style="color:var(--dim);font-size:12.5px;margin:0 0 14px">
+      お使いのChatGPT・Claude・Geminiの<b>Web版</b>に調べさせて、返ってきた文章をここに貼り戻します。API料金はかかりません。</p>
+
+    <div class="bridgetabs">
+      <button class="btn sm" data-btask="sns">SNSの数字を調べる</button>
+      <button class="btn sm" data-btask="charter">憲章を作り直す</button>
+      <button class="btn sm" data-btask="sb">SocialBladeのページを貼る</button>
+    </div>
+
+    <div id="sbPanel" style="display:none;margin-bottom:16px">
+      <label class="lab">① SNSを選んで、SocialBladeを開きます</label>
+      <div class="navbtns" style="margin-top:0">
+        <select id="sbPlat" style="max-width:200px">
+          <option value="yt">YouTube</option><option value="tt">TikTok</option>
+          <option value="ig">Instagram</option><option value="x">X（プロフィール）</option>
+        </select>
+        <button class="btn primary" id="btnSbSearch">SocialBladeで探す</button>
+        <button class="btn" id="btnSbOpen">直接ひらく（URL指定）</button>
+      </div>
+      <ol style="color:var(--dim);font-size:12.5px;line-height:1.9;margin:12px 0 0;padding-left:20px">
+        <li>上部の検索窓に<b>アーティスト名</b>を入れる（Enterは押さない）</li>
+        <li>下に出てきた<b>候補をクリック</b>する</li>
+        <li>統計ページが開いたら <b>⌘+A →⌘+C</b>（Windowsは Ctrl+A → Ctrl+C）で全部コピー</li>
+        <li>下の②に貼り付けて「数字を取り込む」</li>
+      </ol>
+      <p class="note" style="color:var(--dim);font-size:12px;margin:10px 0 0">
+        見出しの「5.04K」だけでなく、下の日別表があれば <b>正確な実数（5,046など）</b>を優先して取り込みます。</p>
+
+      <div style="border-top:1px solid var(--line);margin-top:16px;padding-top:14px">
+        <label class="lab" style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="proxyOn" style="width:auto;padding:0"> 「自動取得」でSocialBladeを直接読みにいく（うまくいけば貼り付け不要）
+        </label>
+        <input id="proxyUrl" placeholder="https://r.jina.ai/{url}" style="margin-top:8px;font-family:var(--font-lab);font-size:12px">
+        <label class="lab" style="margin-top:12px">Xの取得元（上から順に試します。{h}にハンドル名が入ります）</label>
+        <textarea id="xSrc" style="min-height:74px;font-family:var(--font-lab);font-size:12px"></textarea>
+        <p class="note" style="color:var(--dim);font-size:12px;margin:8px 0 0">
+          ブラウザから他サイトを直接読むことは禁止されているため、間に「読み取りサービス」を挟みます。第三者のサービスなので、止まったり弾かれたりすることがあります。失敗したら自動で貼り付け画面に切り替わります。</p>
+      </div>
+    </div>
+
+    <label class="lab" id="bridgePromptLab">① この文章をコピーして、AIに貼り付けてください</label>
+    <textarea id="bridgePrompt" style="min-height:200px;font-size:12.5px"></textarea>
+    <div class="navbtns" style="margin-top:10px">
+      <button class="btn primary" id="btnBridgeCopy">コピーする</button>
+      <button class="btn" data-open="https://chatgpt.com/">ChatGPTを開く</button>
+      <button class="btn" data-open="https://claude.ai/new">Claudeを開く</button>
+      <button class="btn" data-open="https://gemini.google.com/app">Geminiを開く</button>
+    </div>
+
+    <label class="lab" style="margin-top:22px">② AIの回答をそのまま貼り付けてください</label>
+    <textarea id="bridgeIn" style="min-height:180px;font-size:12.5px" placeholder="ここに貼り付け"></textarea>
+    <div class="navbtns">
+      <button class="btn primary" id="btnBridgeNums">数字を取り込む</button>
+      <button class="btn primary" id="btnBridgeCharterAdd">憲章に追記する</button>
+      <button class="btn" id="btnBridgeCharterSet">憲章を置き換える</button>
+      <button class="btn ghost" id="btnBridgeClose">閉じる</button>
+    </div>
+    <div class="rootline" id="bridgeNote" style="margin-top:12px">取り込んだ内容は、3つのAI全員がすぐに参照します。</div>
+  </div>
+</div>
+
+<!-- ============ 運営データ ============ -->
+<div class="modal" id="opsModal">
+  <div class="modalbox">
+    <h2>運営データ</h2>
+    <p class="note" style="color:var(--dim);font-size:12.5px;margin:0 0 14px">
+      ここに入れた内容は、3つのAI全員が会議の前提として読みます。空欄の行は保存時に消えます。</p>
+    <div class="bridgetabs">
+      <button class="btn sm" data-ops="act">施策ログ</button>
+      <button class="btn sm" data-ops="sch">スケジュール・締切</button>
+      <button class="btn sm" data-ops="bud">予算と実績</button>
+      <button class="btn sm" data-ops="str">配信の数値</button>
+    </div>
+
+    <div class="opspane" data-opp="act">
+      <p class="opshint">やったこととその反応。<b>SNSの推移グラフに縦線で重ねて表示</b>されるので、山や谷の理由が一目で分かります。「前回効いた形」をAIが判断できるようになります。</p>
+      <table class="ops"><thead><tr><th style="width:110px">日付</th><th style="width:90px">対象</th><th>やったこと</th><th>反応・結果</th><th style="width:28px"></th></tr></thead><tbody id="rowsAct"></tbody></table>
+      <button class="btn sm" data-addrow="act">行を追加</button>
+    </div>
+
+    <div class="opspane" data-opp="sch">
+      <p class="opshint">締切と担当。日付が入っていないと、マネージャー役も制作役も「いつまでに」を判断できません。直近のものは議題画面にも出ます。</p>
+      <table class="ops"><thead><tr><th style="width:110px">期限</th><th>やること</th><th style="width:120px">担当</th><th style="width:60px">完了</th><th style="width:28px"></th></tr></thead><tbody id="rowsSch"></tbody></table>
+      <button class="btn sm" data-addrow="sch">行を追加</button>
+    </div>
+
+    <div class="opspane" data-opp="bud">
+      <p class="opshint">経理役に数字がないと一般論しか出せません。ライブ1本の収支と制作費の枠だけでも入れると、発言の質が変わります。</p>
+      <table class="ops"><thead><tr><th>項目</th><th style="width:110px">予算</th><th style="width:110px">実績</th><th>メモ</th><th style="width:28px"></th></tr></thead><tbody id="rowsBud"></tbody></table>
+      <button class="btn sm" data-addrow="bud">行を追加</button>
+      <div class="rootline" id="budSum" style="margin-top:10px"></div>
+    </div>
+
+    <div class="opspane" data-opp="str">
+      <p class="opshint">フォロワー数は「認知」、配信数値は「実際に聴かれているか」。Spotify for Artistsの数字を入れてください。<b>月間リスナー数</b>だけでも議論が具体的になります。</p>
+      <table class="ops"><thead><tr><th style="width:110px">日付</th><th style="width:130px">月間リスナー</th><th>楽曲別・その他メモ</th><th style="width:28px"></th></tr></thead><tbody id="rowsStr"></tbody></table>
+      <button class="btn sm" data-addrow="str">行を追加</button>
+      <div class="navbtns" style="margin-top:6px"><button class="btn sm" id="btnSpotify">Spotify for Artists を開く</button></div>
+    </div>
+
+    <div class="navbtns">
+      <button class="btn primary" id="btnOpsSave">保存する</button>
+      <button class="btn ghost" id="btnOpsClose">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 決定事項の編集 ============ -->
+<div class="modal" id="decModal">
+  <div class="modalbox">
+    <h2>これまでに決まったこと</h2>
+    <p class="note" style="color:var(--dim);font-size:12.5px;margin:0 0 12px">
+      会議を保存するたびに、その回の「結論・決定事項」がここに追記されます。古くなったものや取り消しになったものは、直接消してください。</p>
+    <textarea id="decText" style="min-height:46vh;font-size:13px"></textarea>
+    <div class="navbtns">
+      <button class="btn primary" id="btnDecSave">保存する</button>
+      <button class="btn ghost" id="btnDecClose">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Xの手入力 ============ -->
+<div class="modal" id="xModal">
+  <div class="modalbox" style="max-width:460px">
+    <h2>Xのフォロワー数を入力</h2>
+    <p class="note" style="color:var(--dim);font-size:12.5px;margin:0 0 14px">
+      XはSocialBladeから削除され、自動での取得もX側で遮断されています。プロフィールを開いて、表示されている数字を入れてください。</p>
+    <div class="field"><input id="xInput" type="number" placeholder="例）4448" inputmode="numeric"></div>
+    <div class="rootline" id="xPrev" style="margin-bottom:12px"></div>
+    <div class="navbtns">
+      <button class="btn primary" id="btnXSave">保存する</button>
+      <button class="btn" id="btnXOpen">Xのプロフィールを開く</button>
+      <button class="btn ghost" id="btnXSkip">今回は入れない</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 推移グラフ ============ -->
+<div class="modal" id="trendModal">
+  <div class="modalbox">
+    <h2>フォロワー数の推移</h2>
+    <div id="trendBody"></div>
+    <div class="navbtns"><button class="btn ghost" id="btnTrendClose">閉じる</button></div>
+  </div>
+</div>
+
+<!-- ============ 調査ログモーダル ============ -->
+<div class="modal" id="reportModal">
+  <div class="modalbox">
+    <h2>フォロワー数の調査ログ</h2>
+    <p class="note" style="color:var(--dim);font-size:12.5px;margin:0 0 12px">ホストAIが検索して報告してきた内容そのままです。数字が合わないときは、ここを見れば何を見て答えたのか分かります。</p>
+    <div id="reportBody" style="white-space:pre-wrap;font-size:13px;background:#16140F;border:1px solid var(--line);padding:12px;max-height:52vh;overflow:auto"></div>
+    <div class="navbtns"><button class="btn ghost" id="btnReportClose">閉じる</button></div>
+  </div>
+</div>
+
+<!-- ============ 料金設定モーダル ============ -->
+<div class="modal" id="rateModal">
+  <div class="modalbox">
+    <h2>料金設定</h2>
+    <p class="note" style="color:var(--dim);font-size:12.5px;margin:0 0 14px">
+      単価はモデルごとに持ちます。新しいモデルを使うと行が自動で増えます。空欄のモデルは「単価未設定」として金額に含めません。</p>
+
+    <label class="lab" style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+      <input type="checkbox" id="freeMode" style="width:auto;padding:0"> 無料枠で使っている（金額を¥0として扱う。トークン数は記録します）
+    </label>
+
+    <table class="ratetbl"><thead><tr>
+      <th>モデル</th><th style="width:120px">入力 $/100万</th><th style="width:120px">出力 $/100万</th>
+    </tr></thead><tbody id="rateRows"></tbody></table>
+
+    <div class="row2">
+      <div class="field"><label class="lab">為替 1USD = ○円</label><input id="fxRate" type="number" step="0.1"></div>
+      <div class="field"><label class="lab">本日の上限（円・0で無制限）</label><input id="dayLimit" type="number" step="10"></div>
+    </div>
+    <div class="field"><label class="lab">単価の確認日</label><input id="rateDate" placeholder="2026-08-16"></div>
+    <div class="rootline" id="rateNote" style="margin-bottom:4px"></div>
+    <p class="note" style="color:var(--dim);font-size:12px;margin:8px 0 0">
+      ※ この計算はキャッシュ割引・ウェブ検索の従量課金などを拾いきれないため、実際より安く出ることがあります。事故防止の最後の砦は、Google Cloud側の予算アラートで設定してください。</p>
+
+    <div class="navbtns">
+      <button class="btn primary" id="btnRateSave">保存する</button>
+      <button class="btn" id="btnRateReset">本日の集計をリセット</button>
+      <button class="btn ghost" id="btnRateClose">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 待機モーダル ============ -->
+<div class="modal" id="waitModal">
+  <div class="modalbox" style="max-width:460px;text-align:center">
+    <h2 id="waitTitle">作業中</h2>
+    <p id="waitMsg" style="color:var(--dim);font-size:13px">しばらくお待ちください。</p>
+    <div class="sig" style="margin-top:16px"><i style="animation:slide 1.2s linear infinite"></i></div>
+  </div>
+</div>
+
+<datalist id="modelList"></datalist>
+<datalist id="roleList">
+  <option value="アーティストマネージャー"><option value="音源制作ディレクター"><option value="ライブ制作">
+  <option value="経理・収支管理"><option value="宣伝・SNS戦略"><option value="A&R"><option value="グッズ・物販">
+</datalist>
+<div id="errBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:80;background:#C4453A;color:#fff;padding:10px 16px;font-size:13px"></div>
+<div class="toast" id="toast"></div>
+<div id="printArea"></div>
+
+<script>
+/* =====================================================================
+   AI会議 — Conference Desk
+   ===================================================================== */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const LS = 'aikaigi:v1';
+
+const PROVIDERS = {
+  openai: { label:'ChatGPT (OpenAI)', model:'gpt-4o', search:false },
+  claude: { label:'Claude (Anthropic)', model:'claude-sonnet-5', search:true },
+  gemini: { label:'Gemini (Google)', model:'gemini-3.6-flash', search:true }
+};
+
+let S = {
+  rootHandle:null, projDirHandle:null, mode:'local',
+  projects:[], project:null, agendaTitle:'', startedAt:null,
+  hostIndex:0, images:[], log:[], loadedMinutes:'',
+  gkey:'', gmodels:[], usage:{date:'',count:0}, mobileCh:0,
+  proxy:'https://r.jina.ai/{url}', proxyOn:true,
+  xSources:[
+    'https://www.google.com/search?q={h}+X+%E3%83%95%E3%82%A9%E3%83%AD%E3%83%AF%E3%83%BC',
+    'https://www.bing.com/search?q={h}+x.com+followers',
+    'https://html.duckduckgo.com/html/?q={h}+x.com+followers',
+    'https://xcancel.com/{h}',
+    'https://nitter.net/{h}'
+  ],
+  cost:{
+    fx:150, limit:0, freeMode:true, date:'2026-08-16', override:false,
+    rates:{
+      'gemini-3.6-flash':{i:1.50,o:7.50},
+      'gemini-3.5-flash':{i:1.50,o:9.00},
+      'gemini-3.5-flash-lite':{i:null,o:null},
+      'gemini-2.5-flash-lite':{i:0.10,o:0.40},
+      'claude-sonnet-5':{i:2.00,o:10.00},
+      'claude-haiku-4.5':{i:1.00,o:5.00},
+      'gpt-5.1':{i:1.25,o:10.00}
+    },
+    day:{date:'', ch:[{req:0,i:0,o:0,usd:0},{req:0,i:0,o:0,usd:0},{req:0,i:0,o:0,usd:0}], unknown:[]},
+    meeting:{ch:[{req:0,i:0,o:0,usd:0},{req:0,i:0,o:0,usd:0},{req:0,i:0,o:0,usd:0}]}
+  },
+  ais:[
+    {id:0,provider:'gemini',model:'gemini-3.6-flash',key:'',role:'',temp:0.3,on:true,history:[]},
+    {id:1,provider:'gemini',model:'gemini-3.6-flash',key:'',role:'',temp:0.8,on:true,history:[]},
+    {id:2,provider:'gemini',model:'gemini-3.5-flash-lite',key:'',role:'',temp:1.1,on:true,history:[]}
+  ],
+  ytKey:''
+};
+
+/* ---------- ちいさな道具 ---------- */
+function toast(msg, ms=2600){ const t=$('#toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('on'), ms); }
+function wait(on, title='作業中', msg='しばらくお待ちください。'){ $('#waitTitle').textContent=title; $('#waitMsg').textContent=msg; $('#waitModal').classList.toggle('on', on); }
+function show(id){ $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
+function safeName(s){ return (s||'無題').replace(/[\\/:*?"<>|]/g,'_').trim().slice(0,60) || '無題'; }
+function stampNow(){ const d=new Date(); const p=n=>String(n).padStart(2,'0');
+  return { date:`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`, time:`${p(d.getHours())}:${p(d.getMinutes())}`,
+           file:`${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}`, iso:d.toISOString() }; }
+function num(n){ return n===''||n==null ? '—' : Number(String(n).replace(/[^\d]/g,'')).toLocaleString('ja-JP'); }
+
+/* ---------- ローカル設定（APIキーなど） ---------- */
+function saveLocal(){
+  try{
+  localStorage.setItem(LS, JSON.stringify({
+    ais:S.ais.map(a=>({provider:a.provider,model:a.model,key:a.key,role:a.role,temp:a.temp,on:a.on})),
+    hostIndex:S.hostIndex, ytKey:S.ytKey, mode:S.mode, gkey:S.gkey, gmodels:S.gmodels, usage:S.usage,
+    proxy:S.proxy, proxyOn:S.proxyOn, xSources:S.xSources,
+    cost:{fx:S.cost.fx,limit:S.cost.limit,freeMode:S.cost.freeMode,date:S.cost.date,rates:S.cost.rates,day:S.cost.day},
+    projectsLocal:S.mode==='local' ? S.projects : undefined
+  }));
+  }catch(e){ console.warn('保存できませんでした', e); }
+}
+function loadLocal(){
+  try{
+    const d = JSON.parse(localStorage.getItem(LS)||'{}');
+    if(d.ais) d.ais.forEach((a,i)=>{ if(S.ais[i]){ Object.assign(S.ais[i], a); if(typeof S.ais[i].on!=='boolean') S.ais[i].on=true; } });
+    if(typeof d.hostIndex==='number') S.hostIndex=d.hostIndex;
+    if(d.ytKey) S.ytKey=d.ytKey;
+    if(d.gkey) S.gkey=d.gkey;
+    if(d.proxy) S.proxy=d.proxy;
+    if(Array.isArray(d.xSources) && d.xSources.length) S.xSources=d.xSources;
+    if(typeof d.proxyOn==='boolean') S.proxyOn=d.proxyOn;
+    if(d.gmodels) S.gmodels=d.gmodels;
+    if(d.usage) S.usage=d.usage;
+    if(d.cost){
+      const c=d.cost;
+      if(typeof c.fx==='number') S.cost.fx=c.fx;
+      if(typeof c.limit==='number') S.cost.limit=c.limit;
+      if(typeof c.freeMode==='boolean') S.cost.freeMode=c.freeMode;
+      if(c.date) S.cost.date=c.date;
+      if(c.rates) S.cost.rates=Object.assign({}, S.cost.rates, c.rates);
+      if(c.day) S.cost.day=c.day;
+    }
+    if(d.projectsLocal) S.projects=d.projectsLocal;
+    S.ais.forEach(a=>{ if(/^gemini-2\.5/.test(a.model||'')) a.model = /lite/.test(a.model)?'gemini-3.5-flash-lite':'gemini-3.6-flash'; });
+  }catch(e){}
+}
+
+/* ---------- フォルダ保存（File System Access API） ---------- */
+const FS_OK = typeof window.showDirectoryPicker === 'function';
+function idb(){ return new Promise((res,rej)=>{ const r=indexedDB.open('aikaigi',1);
+  r.onupgradeneeded=()=>r.result.createObjectStore('h'); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+async function idbPut(k,v){ try{ const db=await idb(); return new Promise(res=>{ const t=db.transaction('h','readwrite'); t.objectStore('h').put(v,k); t.oncomplete=res; t.onerror=res; }); }catch(e){} }
+async function idbGet(k){ try{ const db=await idb(); return new Promise(res=>{ const t=db.transaction('h','readonly'); const q=t.objectStore('h').get(k); q.onsuccess=()=>res(q.result); q.onerror=()=>res(null); }); }catch(e){ return null; } }
+
+async function pickRoot(){
+  if(!FS_OK){ toast('このブラウザはフォルダ保存に対応していません。ブラウザ内保存で続けます'); S.mode='local'; renderRoot(); return; }
+  try{
+    const dir = await window.showDirectoryPicker({ mode:'readwrite' });
+    S.rootHandle = await dir.getDirectoryHandle('AI会議', {create:true});
+    S.mode='fs'; await idbPut('root', dir); saveLocal();
+    await scanProjects(); renderRoot(); toast('保存先を設定しました');
+  }catch(e){ if(e.name!=='AbortError') toast('保存先を開けませんでした：'+e.message); }
+}
+async function resumeRoot(){
+  const dir = await idbGet('root'); if(!dir) return false;
+  const perm = await dir.queryPermission({mode:'readwrite'});
+  if(perm!=='granted'){ const p = await dir.requestPermission({mode:'readwrite'}); if(p!=='granted') return false; }
+  S.rootHandle = await dir.getDirectoryHandle('AI会議', {create:true});
+  S.mode='fs'; await scanProjects(); renderRoot(); return true;
+}
+async function writeFile(dirHandle, name, text){
+  const fh = await dirHandle.getFileHandle(name, {create:true});
+  const w = await fh.createWritable(); await w.write(new Blob([text],{type:'text/plain;charset=utf-8'})); await w.close();
+}
+async function readFile(dirHandle, name){
+  try{ const fh = await dirHandle.getFileHandle(name); const f = await fh.getFile(); return await f.text(); }catch(e){ return null; }
+}
+function download(name, text){
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));
+  a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+
+async function scanProjects(){
+  if(S.mode!=='fs'||!S.rootHandle) return;
+  const list=[];
+  for await (const [name, h] of S.rootHandle.entries()){
+    if(h.kind!=='directory') continue;
+    const j = await readFile(h, 'project.json');
+    let p = { name, dirName:name, updated:'' };
+    if(j){ try{ const o=JSON.parse(j); p = Object.assign(p, o, {dirName:name}); }catch(e){} }
+    list.push(p);
+  }
+  S.projects = list.sort((a,b)=> (b.updated||'').localeCompare(a.updated||''));
+}
+
+/* =====================================================================
+   起動画面
+   ===================================================================== */
+function renderRoot(){
+  $('#rootLine').textContent = S.mode==='fs'
+    ? '保存先：選択したフォルダ ／ AI会議'
+    : 'ブラウザ内に保存中（フォルダ未選択）。保存ボタンでファイルをダウンロードできます。';
+  renderProjects();
+}
+function renderProjects(){
+  const ul=$('#projList'); ul.innerHTML='';
+  $('#projEmpty').style.display = S.projects.length ? 'none':'block';
+  S.projects.forEach(p=>{
+    const li=document.createElement('li');
+    li.innerHTML = `<span><span class="pn"></span> <span class="pd"></span></span>`;
+    li.querySelector('.pn').textContent = p.name;
+    li.querySelector('.pd').textContent = p.updated ? '最終更新 '+p.updated.slice(0,10) : '';
+    const b=document.createElement('button'); b.className='btn sm'; b.textContent='開く';
+    b.onclick=()=>openProject(p); li.appendChild(b); ul.appendChild(li);
+  });
+}
+async function openProject(p){
+  if(S.mode==='fs'){
+    S.projDirHandle = await S.rootHandle.getDirectoryHandle(p.dirName||safeName(p.name), {create:true});
+    const j = await readFile(S.projDirHandle,'project.json');
+    S.project = j ? JSON.parse(j) : p;
+    const c = await readFile(S.projDirHandle,'憲章.md'); if(c) S.project.charter=c;
+  } else {
+    S.project = p;
+  }
+  $('#agProjName').textContent = S.project.name;
+  await renderAgendaList(); renderAgendaStatus(); show('s-agenda');
+}
+function renderAgendaStatus(){
+  const el=$('#agSns'); if(el) el.textContent = snsBlock().split('\n').filter(l=>!l.startsWith('※')).join('　／　');
+  const dv=$('#agDecisions');
+  if(dv){ const t=decisionsText(); dv.textContent = t || 'まだ決定事項はありません。会議を保存すると、その回の「結論・決定事項」がここに積み上がります。'; }
+  const ex=$('#agExternal'); if(ex) ex.value=(S.project&&S.project.external)||'';
+  const sc=$('#agSchedule');
+  if(sc){
+    const list=((S.project&&S.project.schedule)||[]).filter(r=>r.task&&!r.done)
+      .sort((a,b)=>String(a.d).localeCompare(String(b.d))).slice(0,4);
+    sc.textContent = list.length
+      ? '直近の締切：'+list.map(r=>`${(r.d||'期限未定').replace(/-/g,'/')} ${r.task}${r.owner?`（${r.owner}）`:''}`).join('　／　')
+      : '締切は未登録です。「運営データを開く」から追加できます。';
+  }
+}
+async function renderAgendaList(){
+  const ul=$('#agList'); ul.innerHTML=''; let items=[];
+  if(S.mode==='fs' && S.projDirHandle){
+    for await (const [name,h] of S.projDirHandle.entries()){
+      if(h.kind==='file' && name.startsWith('議事録_') && name.endsWith('.md')) items.push(name);
+    }
+    items.sort().reverse();
+  } else {
+    items = (S.project.agendas||[]).map(a=>a.file);
+  }
+  $('#agEmpty').style.display = items.length ? 'none':'block';
+  items.forEach(name=>{
+    const li=document.createElement('li');
+    const title=name.replace(/^議事録_/,'').replace(/\.md$/,'');
+    li.innerHTML='<span class="pn"></span>'; li.querySelector('.pn').textContent=title;
+    const b=document.createElement('button'); b.className='btn sm'; b.textContent='続きから始める';
+    b.onclick=()=>resumeAgenda(name,title); li.appendChild(b); ul.appendChild(li);
+  });
+}
+async function resumeAgenda(file,title){
+  let md='', data=null;
+  if(S.mode==='fs'){
+    md = await readFile(S.projDirHandle,file) || '';
+    const dj = await readFile(S.projDirHandle, file.replace(/^議事録_/,'会議データ_').replace(/\.md$/,'.json'));
+    if(dj){ try{ data=JSON.parse(dj); }catch(e){} }
+  } else {
+    const a=(S.project.agendas||[]).find(a=>a.file===file);
+    md = a?.minutes || ''; data = a?.data || null;
+  }
+  S.loadedMinutes = md;
+  const t = title.replace(/^\d{8}_\d{4}_/,'');
+  startMeeting(t);
+  if(data){
+    if(typeof data.host==='number') S.hostIndex=data.host;
+    (data.ais||[]).forEach((a,i)=>{ if(S.ais[i]){
+      if(a.role) S.ais[i].role=a.role;
+      S.ais[i].history = Array.isArray(a.history)? a.history : [];
+    }});
+    S.log = Array.isArray(data.log)? data.log : [];
+    renderChannels();
+    S.ais.forEach((a,i)=>{ if(a.history.length) addMsg(i,'—','── ここまでが前回。以下、続きの会議です ──','u'); });
+    toast('前回の会話をそのまま復元しました。各AIは全発言を覚えています');
+  } else {
+    S.ais.forEach((a,i)=>addMsg(i,'—','前回の議事録を読み込みました。各AIはその内容を把握しています。','u'));
+    toast('前回の議事録を読み込みました（発言の全文データは見つかりませんでした）');
+  }
+}
+
+/* =====================================================================
+   ウィザード
+   ===================================================================== */
+let W = {step:0, data:{name:'',profile:'',hp:'',ig:'',tt:'',yt:'',x:'',ng:'',must:''}};
+const WFIELDS = {name:'#w-name',profile:'#w-profile',hp:'#w-hp',ig:'#w-ig',tt:'#w-tt',yt:'#w-yt',x:'#w-x',ng:'#w-ng',must:'#w-must'};
+function wizFill(){ for(const k in WFIELDS) $(WFIELDS[k]).value = W.data[k]||''; }
+function wizGrab(){ for(const k in WFIELDS) W.data[k] = $(WFIELDS[k]).value.trim(); }
+function wizGo(n){
+  wizGrab(); W.step = Math.max(0, Math.min(5, n));
+  $$('.wizpane').forEach(p=>p.classList.toggle('on', +p.dataset.p===W.step));
+  $$('.step').forEach(s=>{ const i=+s.dataset.s; s.classList.toggle('on', i===W.step); s.classList.toggle('done', i<W.step); });
+  $('#wizNav').style.display = W.step===5 ? 'none':'flex';
+  $('#btnPrev').style.visibility = W.step===0 ? 'hidden':'visible';
+  if(W.step===5) wizSummary();
+  $('#w-path').textContent = (S.mode==='fs' ? 'AI会議 / ' : 'ブラウザ内保存 / ') + (safeName(W.data.name)||'（プロジェクト名）');
+  window.scrollTo(0,0);
+}
+function wizSummary(){
+  const d=W.data;
+  $('#w-summary').textContent =
+`プロジェクト名：${d.name||'（未入力）'}
+
+■ プロフィール
+${d.profile||'（未入力）'}
+
+■ ホームページ
+${d.hp||'無し'}
+
+■ SNS
+Instagram：${d.ig||'無し'}
+TikTok：${d.tt||'無し'}
+YouTube：${d.yt||'無し'}
+X：${d.x||'無し'}
+
+■ NG（やらないこと）
+${d.ng||'無し'}
+
+■ マスト（必ず守ること）
+${d.must||'無し'}`;
+  fillHostSelect();
+  const hi=+($('#w-host').value||S.hostIndex);
+  $('#w-hostshow').textContent = `CH0${hi+1} ${PROVIDERS[S.ais[hi].provider].label} / ${S.ais[hi].model}` + (keyFor(S.ais[hi])?'':'（APIキー未設定）');
+}
+function fillHostSelect(){
+  const sel=$('#w-host'); if(!sel) return;
+  sel.innerHTML='';
+  S.ais.forEach((a,i)=>{ const o=document.createElement('option'); o.value=i;
+    o.textContent = `CH0${i+1}　${PROVIDERS[a.provider].label}`; sel.appendChild(o); });
+  sel.value = S.hostIndex;
+  const mi=$('#w-hostmodel'); if(mi) mi.value = S.ais[S.hostIndex].model;
+  const gk=$('#w-gkey'); if(gk) gk.value = S.gkey||'';
+}
+function wizError(msg){
+  const box=$('#wizErr'), m=$('#wizErrMsg');
+  if(!box) return;
+  if(!msg){ box.style.display='none'; return; }
+  m.textContent = msg; box.style.display='block'; box.scrollIntoView({block:'center'});
+}
+function charterFromInput(d, analysis){
+  return `# ${d.name} 憲章
+
+作成日：${stampNow().date}
+
+## プロフィール
+${d.profile||'（未記入）'}
+
+## 公式リンク
+- ホームページ：${d.hp||'無し'}
+- Instagram：${d.ig||'無し'}
+- TikTok：${d.tt||'無し'}
+- YouTube：${d.yt||'無し'}
+- X：${d.x||'無し'}
+
+## NG（やらないこと）
+${d.ng||'無し'}
+
+## マスト（必ず守ること）
+${d.must||'無し'}
+${analysis ? '\n---\n\n'+analysis : ''}`;
+}
+async function buildCharter(useAI){
+  wizGrab();
+  if(!W.data.name){ toast('プロジェクト名を入れてください'); wizGo(0); return; }
+  let analysis='';
+  if(useAI){
+    const hi = +$('#w-host').value; const ai = S.ais[hi];
+    if(!keyFor(ai)){ wizError('ホストのAPIキーが入っていません。\n\n1ページ目（プロジェクト名の画面）に戻り、「Gemini APIキー」を貼り付けて「接続テスト」を押してください。\nキーなしで進める場合は「AIを使わず、入力内容だけで作る」を選んでください。'); return; }
+    S.hostIndex = hi; saveLocal();
+    const useSearch = $('#w-search').value==='1' && PROVIDERS[ai.provider].search;
+    wait(true,'調査中','ホストがホームページとSNSを調べています。1〜3分ほどかかります。');
+    try{
+      const d=W.data;
+      const prompt =
+`あなたはアーティストマネジメントとブランディングのプロフェッショナルです。以下のアーティスト／プロジェクトについて、${useSearch?'ウェブ検索を使って徹底的に調査し、':''}売るために必要な情報を洗い出して「憲章」の分析パートを日本語のMarkdownで書いてください。
+
+【名称】${d.name}
+【プロフィール】${d.profile||'（記載なし）'}
+【ホームページ】${d.hp||'無し'}
+【Instagram】${d.ig||'無し'}
+【TikTok】${d.tt||'無し'}
+【YouTube】${d.yt||'無し'}
+【X】${d.x||'無し'}
+【NG】${d.ng||'無し'}
+【マスト】${d.must||'無し'}
+
+次の見出しで書いてください。
+## 現在のブランディング
+## 浸透している年齢層・リスナー像
+## SNSごとの状況（伸びている投稿・動画の傾向）
+## 本人たちの発言・トーン
+## 競合と立ち位置
+## 売るために必要なこと（施策仮説）
+## 未確認事項
+
+事実として確認できたことと、推測はきちんと区別して書いてください。確認できなかったことは「未確認事項」に正直に書き、憶測で断定しないこと。NGとマストは絶対条件として扱ってください。`;
+      const sysp='あなたは音楽業界のアーティストマネジメントとブランディングの専門家です。日本語で、具体的かつ実務的に書きます。';
+      try{
+        analysis = await callAI(ai, [], prompt, {search:useSearch, system:sysp});
+        if(useSearch && !LAST.grounded){
+          analysis = '> ※このモデルではウェブ検索が働かなかったため、以下はAIの知識と入力内容に基づく内容です。実データの裏取りが必要です。\n\n'+analysis;
+        } else if(LAST.sources.length){
+          analysis = analysis + '\n\n---\n\n### 調査で参照した情報源\n'+LAST.sources.map(x=>'- '+x).join('\n');
+        }
+      }catch(e1){
+        if(useSearch){
+          wait(true,'再試行中','ウェブ検索なしでもう一度試しています。');
+          analysis = await callAI(ai, [], prompt, {search:false, system:sysp});
+          analysis = '> ※ウェブ検索が使えなかったため、入力内容とAIの知識だけでまとめています。\n\n'+analysis;
+        } else throw e1;
+      }
+    }catch(e){
+      wait(false);
+      wizError('調査に失敗しました。\n\n'+e.message+'\n\n・モデル名が古い場合は、1ページ目の「モデル一覧を取得」を押してください\n・すぐ進めたい場合は「AIを使わず、入力内容だけで作る」で憲章を作り、あとから「憲章」→「AIに作り直してもらう」で調査できます');
+      return;
+    }
+    wait(false); wizError('');
+  }
+  const charter = charterFromInput(W.data, analysis);
+  S.project = {
+    name:W.data.name, dirName:safeName(W.data.name), profile:W.data.profile, hp:W.data.hp,
+    sns:{ig:W.data.ig,tt:W.data.tt,yt:W.data.yt,x:W.data.x}, ng:W.data.ng, must:W.data.must,
+    followers:{ig:'',x:'',tt:'',yt:''}, charter, created:stampNow().iso, updated:stampNow().iso, agendas:[]
+  };
+  if(S.mode==='fs' && S.rootHandle){
+    S.projDirHandle = await S.rootHandle.getDirectoryHandle(S.project.dirName, {create:true});
+    await writeFile(S.projDirHandle,'憲章.md',charter);
+    await writeFile(S.projDirHandle,'project.json',JSON.stringify(S.project,null,2));
+    await scanProjects();
+  } else {
+    S.projects = S.projects.filter(p=>p.name!==S.project.name); S.projects.unshift(S.project); saveLocal();
+  }
+  $('#agProjName').textContent=S.project.name;
+  await renderAgendaList(); renderAgendaStatus(); show('s-agenda');
+  toast('憲章を作成しました');
+}
+
+/* =====================================================================
+   AI 呼び出し
+   ===================================================================== */
+function snsBlock(){
+  if(!S.project) return '（未取得）';
+  const out=['ig','x','tt','yt'].map(k=>{
+    const cur=latestStat(k), pr=prevStat(k);
+    if(!cur) return `${SNSKEY[k].name}：未取得`;
+    const d=pr ? `／前回(${pr.d})比 ${cur.n-pr.n>0?'+':''}${(cur.n-pr.n).toLocaleString('ja-JP')}` : '';
+    return `${SNSKEY[k].name}：${cur.n.toLocaleString('ja-JP')}（${cur.d}時点${d}）`;
+  });
+  return out.join('\n') + '\n※この数字は全員が把握している前提です。進行役が読み上げる必要はありません。';
+}
+function decisionsText(){
+  const a=(S.project&&S.project.decisions)||[];
+  if(typeof a==='string') return a.trim();
+  return a.map(x=>`【${x.d}｜${x.agenda}】\n${x.text}`).join('\n\n').trim();
+}
+function systemPrompt(ai, idx){
+  const p = S.project||{};
+  const isHost = idx===S.hostIndex;
+  const others = S.ais.filter((a,i)=>i!==idx && a.on).map(a=>a.role||'（役割未設定）').join(' / ') || '（あなた1人）';
+  return `あなたはプロジェクト「${p.name||''}」の会議に参加しているメンバーです。
+
+【あなたの役割】
+${ai.role || '（未設定。総合的な視点で発言してください）'}
+
+【この会議の他の参加者】${others}
+【あなたの立場】${isHost ? 'あなたはこの会議のホスト（進行役）です。ユーザーの発言には必ず最初に答え、論点を整理してから自分の意見を述べてください。' : 'あなたはホスト以外の参加者です。ホストの発言を踏まえ、自分の専門領域から意見を述べてください。同意だけで終わらせず、リスクや別案も必ず示してください。'}
+
+【今回の議題】${S.agendaTitle||'（未設定）'}
+
+━━━ 憲章（このプロジェクトの絶対的な前提） ━━━
+${p.charter||'（未作成）'}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+━━━ 現在のSNS（取得日と前回比） ━━━
+${snsBlock()}
+━━━━━━━━━━━━━━━━━━━━━━
+
+${opsBlocks()}${decisionsText() ? '━━━ これまでに決まっていること ━━━\n'+decisionsText()+'\n━━━━━━━━━━━━━━━━━━\n\n' : ''}${(p.external||'').trim() ? '━━━ AI会議の外で決まったこと・共有事項 ━━━\n'+p.external.trim()+'\n━━━━━━━━━━━━━━━━━━━━━━━━\n\n' : ''}${S.loadedMinutes ? '━━━ 前回までの議事録 ━━━\n'+S.loadedMinutes+'\n━━━━━━━━━━━━━━━━\n' : ''}
+憲章のNGとマストは絶対に破らないでください。日本語で、実務的に、簡潔に発言してください。長い前置きは不要です。`;
+}
+function keyFor(ai){ return (ai.key||'').trim() || (ai.provider==='gemini' ? (S.gkey||'').trim() : ''); }
+function today(){ return stampNow().date; }
+function bumpUsage(){
+  if(S.usage.date!==today()) S.usage={date:today(),count:0};
+  S.usage.count++; const el=$('#usageNum'); if(el) el.textContent=S.usage.count; saveLocal();
+}
+const LAST={grounded:false,sources:[],searched:false,toolsUsed:false,raw:'',report:'',mode:''};
+function blankCh(){ return [{req:0,i:0,o:0,usd:0},{req:0,i:0,o:0,usd:0},{req:0,i:0,o:0,usd:0}]; }
+function costDay(){
+  const d=S.cost.day;
+  if(d.date!==today()){ d.date=today(); d.ch=blankCh(); d.unknown=[]; S.cost.override=false; }
+  return d;
+}
+function yenOf(usd){ return S.cost.freeMode ? 0 : usd*S.cost.fx; }
+function dayUsd(){ return costDay().ch.reduce((a,c)=>a+c.usd,0); }
+function dayYen(){ return yenOf(dayUsd()); }
+function fmtYen(v){ return '¥'+(v<10 ? v.toFixed(1) : Math.round(v).toLocaleString('ja-JP')); }
+function fmtTok(n){ return n>=1000 ? Math.round(n/1000)+'k' : String(n); }
+function costAdd(ai, inTok, outTok){
+  const d=costDay(), c=d.ch[ai.id], m=S.cost.meeting.ch[ai.id];
+  const r=S.cost.rates[ai.model];
+  let usd=0;
+  if(r && typeof r.i==='number' && typeof r.o==='number'){
+    usd = (inTok/1e6)*r.i + (outTok/1e6)*r.o;
+  } else {
+    if(!S.cost.rates[ai.model]) S.cost.rates[ai.model]={i:null,o:null};
+    if(!d.unknown.includes(ai.model)) d.unknown.push(ai.model);
+  }
+  [c,m].forEach(t=>{ t.req++; t.i+=inTok; t.o+=outTok; t.usd+=usd; });
+  updateCostUI(); saveLocal();
+}
+function updateCostUI(){
+  const d=costDay();
+  const el=$('#costToday'); if(el) el.textContent = S.cost.freeMode ? '¥0（無料枠）' : fmtYen(dayYen());
+  S.ais.forEach(a=>{
+    const t=document.querySelector(`[data-cost="${a.id}"]`); if(!t) return;
+    const c=d.ch[a.id];
+    const money = S.cost.freeMode ? '¥0' : fmtYen(yenOf(c.usd));
+    const noRate = !S.cost.freeMode && !(S.cost.rates[a.model]||{}).i;
+    t.textContent = `本日 ${c.req}回 / 入力 ${fmtTok(c.i)} / 出力 ${fmtTok(c.o)} / ${noRate?'単価未設定':money}`;
+  });
+  const bar=document.querySelector('.keybar');
+  if(bar){
+    const L=S.cost.limit, y=dayYen();
+    bar.classList.toggle('warn', !S.cost.freeMode && L>0 && y>=L*0.8 && y<L);
+    bar.classList.toggle('over', !S.cost.freeMode && L>0 && y>=L);
+  }
+}
+function budgetOK(){
+  const L=S.cost.limit;
+  if(S.cost.freeMode || !L || S.cost.override) return true;
+  if(dayYen() < L) return true;
+  const go = confirm(`本日の上限 ${fmtYen(L)} に達しています（現在 ${fmtYen(dayYen())}）。\n\nこのまま続けますか？\n「OK」を押すと、今日はこの先ブロックしません。`);
+  if(go){ S.cost.override=true; return true; }
+  return false;
+}
+let _gate = Promise.resolve();
+function gate(ms){
+  const prev=_gate; let release;
+  _gate = new Promise(r=>release=r);
+  return prev.then(()=> new Promise(r=>{ setTimeout(()=>{ r(); setTimeout(release, ms); }, 0); }));
+}
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+async function callAI(ai, history, userText, opt={}){
+  const sys = opt.system || systemPrompt(ai, ai.id);
+  const imgs = opt.images||[];
+  if(ai.provider==='openai') return callOpenAI(ai,sys,history,userText,imgs);
+  if(ai.provider==='claude') return callClaude(ai,sys,history,userText,imgs,opt.search);
+  return callGemini(ai,sys,history,userText,imgs,opt.search);
+}
+async function callOpenAI(ai,sys,history,userText,imgs){
+  const msgs=[{role:'system',content:sys}];
+  history.forEach(h=>msgs.push({role:h.role==='assistant'?'assistant':'user',content:h.text}));
+  const content=[{type:'text',text:userText}];
+  imgs.forEach(im=>content.push({type:'image_url',image_url:{url:`data:${im.mime};base64,${im.data}`}}));
+  msgs.push({role:'user',content});
+  const r = await fetch('https://api.openai.com/v1/chat/completions',{
+    method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+keyFor(ai)},
+    body:JSON.stringify({model:ai.model,messages:msgs})
+  });
+  const j = await r.json();
+  if(!r.ok) throw new Error(j.error?.message||('OpenAI エラー '+r.status));
+  bumpUsage(); costAdd(ai, j.usage?.prompt_tokens||0, j.usage?.completion_tokens||0);
+  return j.choices?.[0]?.message?.content || '（応答が空でした）';
+}
+async function callClaude(ai,sys,history,userText,imgs,search){
+  const msgs=[];
+  history.forEach(h=>msgs.push({role:h.role==='assistant'?'assistant':'user',content:h.text}));
+  const content=[];
+  imgs.forEach(im=>content.push({type:'image',source:{type:'base64',media_type:im.mime,data:im.data}}));
+  content.push({type:'text',text:userText});
+  msgs.push({role:'user',content});
+  const body={model:ai.model,max_tokens:4000,system:sys,messages:msgs};
+  if(search) body.tools=[{type:'web_search_20250305',name:'web_search',max_uses:8}];
+  const r = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',headers:{'Content-Type':'application/json','x-api-key':keyFor(ai),
+      'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify(body)
+  });
+  const j = await r.json();
+  if(!r.ok) throw new Error(j.error?.message||('Anthropic エラー '+r.status));
+  bumpUsage();
+  costAdd(ai, (j.usage?.input_tokens||0)+(j.usage?.cache_read_input_tokens||0)+(j.usage?.cache_creation_input_tokens||0), j.usage?.output_tokens||0);
+  return (j.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n') || '（応答が空でした）';
+}
+async function callGemini(ai,sys,history,userText,imgs,search){
+  await gate(4200);
+  const contents=[];
+  history.forEach(h=>contents.push({role:h.role==='assistant'?'model':'user',parts:[{text:h.text}]}));
+  const parts=[];
+  imgs.forEach(im=>parts.push({inlineData:{mimeType:im.mime,data:im.data}}));
+  parts.push({text:userText});
+  contents.push({role:'user',parts});
+  const body={systemInstruction:{parts:[{text:sys}]},contents,
+    generationConfig:{temperature: typeof ai.temp==='number'?ai.temp:0.8}};
+  const toolTry = search ? [[{google_search:{}}], [{googleSearchRetrieval:{}}], null] : [null];
+  let ti=0;
+  if(toolTry[0]) body.tools=toolTry[0];
+  LAST.grounded=false; LAST.sources=[]; LAST.searched=!!search;
+  let j=null;
+  for(let n=0;n<6;n++){
+    const url=`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(ai.model)}:generateContent?key=${encodeURIComponent(keyFor(ai))}`;
+    const r = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    j = await r.json();
+    if(r.ok){ bumpUsage();
+      const u=j.usageMetadata||{};
+      costAdd(ai, u.promptTokenCount||0, (u.candidatesTokenCount||0)+(u.thoughtsTokenCount||0));
+      const gm=j.candidates?.[0]?.groundingMetadata;
+      if(gm){
+        LAST.grounded=true;
+        LAST.sources=(gm.groundingChunks||[]).map(c=>c.web?.title||c.web?.uri).filter(Boolean).slice(0,6);
+        if(!LAST.sources.length && gm.webSearchQueries) LAST.sources=gm.webSearchQueries.slice(0,6);
+      }
+      LAST.toolsUsed = !!body.tools;
+      break; }
+    if(r.status===429 && n<3){ await sleep(2000*Math.pow(2,n)); continue; }
+    const em=j.error?.message||'';
+    if((r.status===404 || /no longer available|not found|not supported/i.test(em)) && n<3 && keyFor(ai)){
+      let fixed=false;
+      try{
+        await fetchGeminiModels(keyFor(ai));
+        const nx = pickModel(ai.id===2?'light':'main');
+        if(nx && nx!==ai.model){
+          ai.model = nx; saveLocal();
+          const mi=document.querySelector(`[data-model="${ai.id}"]`); if(mi) mi.value=nx;
+          toast(`CH0${ai.id+1} のモデルを ${nx} に自動変更しました`); fixed=true;
+        }
+      }catch(_){}
+      if(fixed) continue;
+      throw new Error('このモデルは使えなくなっています。「モデル一覧を取得」を押して選び直してください');
+    }
+    if(body.tools && /tool|search|function|grounding/i.test(em) && ti<toolTry.length-1){
+      ti++; if(toolTry[ti]) body.tools=toolTry[ti]; else delete body.tools;
+      continue;
+    }
+    const m=em||('Gemini エラー '+r.status);
+    throw new Error(r.status===429 ? '無料枠の上限に達しました（しばらく待つか、軽いモデルに変えてください）' : m);
+  }
+  return (j.candidates?.[0]?.content?.parts||[]).map(p=>p.text).filter(Boolean).join('\n') || '（応答が空でした）';
+}
+
+/* =====================================================================
+   会議画面
+   ===================================================================== */
+function startMeeting(agendaTitle){
+  S.agendaTitle = agendaTitle||'';
+  S.startedAt = stampNow();
+  S.log=[]; S.images=[]; S.cost.meeting={ch:blankCh()}; S.lastMinutes=null; S.lastParts=null;
+  S.ais.forEach(a=>a.history=[]);
+  $('#d-proj').textContent = S.project.name;
+  $('#d-path').textContent = (S.mode==='fs'?'AI会議 / ':'ブラウザ内保存 / ')+ (S.project.dirName||safeName(S.project.name));
+  $('#d-agenda').value = S.agendaTitle;
+  $('#d-stamp').innerHTML = `<div><b>開催日</b> ${S.startedAt.date}</div><div><b>開始時刻</b> ${S.startedAt.time}</div><div><b>保存形式</b> ${S.mode==='fs'?'フォルダに自動保存':'ダウンロード保存'}</div>`;
+  const f = S.project.followers||{};
+  ['ig','x','tt','yt'].forEach(k=>{
+    const st=latestStat(k);
+    const v = st ? st.n : (f[k]||'');
+    $('#i-'+k).value=v; $('#m-'+k).textContent=num(v);
+  });
+  renderMeterStats();
+  renderChannels(); renderThumbs(); updateCostUI(); renderSbLinks(); show('s-deck');
+}
+function renderChannels(){
+  const c=$('#console'); c.innerHTML='';
+  S.ais.forEach((ai,i)=>{
+    const el=document.createElement('div');
+    el.className='ch'+(i===S.hostIndex?' host':''); el.id='ch'+i;
+    el.innerHTML=`
+      <div class="chhead">
+        <div class="tapewrap">
+          <button class="lamp${i===S.hostIndex?' on':''}" title="ホストにする" data-host="${i}"></button>
+          <div class="tape" data-tape="${i}"></div>
+          <button class="btn sm" data-on="${i}" style="flex:none">${ai.on?'参加中':'休止中'}</button>
+        </div>
+        <div class="chgrid">
+          <select data-prov="${i}"></select>
+          <input data-model="${i}" list="modelList" placeholder="モデル名">
+        </div>
+        <div class="chgrid">
+          <select data-temp="${i}">
+            <option value="0.3">性格：慎重</option>
+            <option value="0.8">性格：標準</option>
+            <option value="1.1">性格：大胆</option>
+          </select>
+          <input data-role="${i}" list="roleList" placeholder="役割">
+        </div>
+        <input type="password" data-key="${i}" placeholder="この窓だけ別のキーを使う場合のみ">
+      </div>
+      <div class="chlog" data-log="${i}"></div>
+      <div class="chfoot">
+        <textarea data-compose="${i}" placeholder="このAIだけに送る文章"></textarea>
+        <div class="sendrow"><button class="btn sm" data-send="${i}">送信</button>
+        <span class="lab" style="margin:0">CH0${i+1}</span></div>
+        <div class="sig"><i></i></div>
+        <div class="chcost" data-cost="${i}"></div>
+      </div>`;
+    c.appendChild(el);
+    const sel=el.querySelector(`[data-prov="${i}"]`);
+    Object.entries(PROVIDERS).forEach(([k,v])=>{ const o=document.createElement('option'); o.value=k; o.textContent=v.label; sel.appendChild(o); });
+    sel.value=ai.provider;
+    el.querySelector(`[data-model="${i}"]`).value=ai.model;
+    el.querySelector(`[data-key="${i}"]`).value=ai.key;
+    el.querySelector(`[data-role="${i}"]`).value=ai.role;
+    const ts=el.querySelector(`[data-temp="${i}"]`); ts.value=String(typeof ai.temp==='number'?ai.temp:0.8);
+    el.classList.toggle('off', !ai.on);
+    updateTape(i);
+    ai.history.forEach(h=>addMsg(i,h.role==='assistant'?PROVIDERS[ai.provider].label:'ユーザー',h.text,h.role==='assistant'?'a':'u'));
+  });
+  if(!S.ais[S.hostIndex].on){ const f=S.ais.find(a=>a.on); if(f) S.hostIndex=f.id; }
+  S.ais.forEach((a,i)=>updateTape(i));
+  layoutConsole();
+}
+function layoutConsole(){
+  const on=S.ais.filter(a=>a.on);
+  const n=Math.max(1,on.length);
+  const narrow = window.innerWidth<=700;
+  const c=$('#console'); if(c) c.style.gridTemplateColumns = window.innerWidth<=980 ? '1fr' : `repeat(${n},1fr)`;
+  if(narrow && !on.some(a=>a.id===S.mobileCh)) S.mobileCh = (on[0]||{id:0}).id;
+  S.ais.forEach(a=>{ const el=$('#ch'+a.id); if(!el) return;
+    el.style.display = (a.on && (!narrow || a.id===S.mobileCh)) ? 'flex':'none'; });
+  const tabs=$('#chTabs');
+  if(tabs){
+    tabs.innerHTML='';
+    on.forEach(a=>{
+      const b=document.createElement('button');
+      b.textContent=(a.id===S.hostIndex?'★':'')+(a.role||`CH0${a.id+1}`);
+      b.className = a.id===S.mobileCh ? 'on':'';
+      b.onclick=()=>{ S.mobileCh=a.id; layoutConsole(); };
+      tabs.appendChild(b);
+    });
+  }
+  const bar=$('#chOff'); if(bar){
+    bar.innerHTML='';
+    S.ais.filter(a=>!a.on).forEach(a=>{
+      const b=document.createElement('button'); b.className='btn sm';
+      b.textContent=`CH0${a.id+1}（${PROVIDERS[a.provider].label}）を参加させる`;
+      b.onclick=()=>{ a.on=true; updateTape(a.id); saveLocal(); };
+      bar.appendChild(b);
+    });
+  }
+}
+window.addEventListener('resize', layoutConsole);
+function updateTape(i){
+  const ai=S.ais[i];
+  const t=document.querySelector(`[data-tape="${i}"]`);
+  if(t) t.textContent = (i===S.hostIndex?'★HOST ':'') + (ai.on?'':'（休止）') + PROVIDERS[ai.provider].label + (ai.role?' — '+ai.role:'');
+  const ch=$('#ch'+i); if(ch){ ch.classList.toggle('host', i===S.hostIndex); ch.classList.toggle('off', !ai.on); }
+  const ob=document.querySelector(`[data-on="${i}"]`); if(ob) ob.textContent = ai.on?'参加中':'休止中';
+  $$('.lamp').forEach(l=>l.classList.toggle('on', +l.dataset.host===S.hostIndex));
+  layoutConsole();
+}
+function addMsg(i,who,text,cls){
+  const log=document.querySelector(`[data-log="${i}"]`); if(!log) return;
+  const d=document.createElement('div'); d.className='msg '+(cls||'a');
+  const w=document.createElement('div'); w.className='who'; w.textContent=who;
+  const b=document.createElement('div'); b.className='bd'; b.textContent=text;
+  d.appendChild(w); d.appendChild(b); log.appendChild(d); log.scrollTop=log.scrollHeight;
+}
+function busy(i,on){ const ch=$('#ch'+i); if(ch) ch.classList.toggle('busy',on);
+  const l=document.querySelector(`[data-host="${i}"]`); if(l) l.classList.toggle('live',on); }
+
+async function sendTo(i, text, images){
+  const ai=S.ais[i];
+  if(!budgetOK()){ addMsg(i,'停止','本日の上限に達したため送信しませんでした。「料金設定」で上限を上げるか、明日また続けてください。','err'); return null; }
+  if(!keyFor(ai)){ addMsg(i,'エラー','APIキーが設定されていません。画面上部の「Gemini APIキー」に貼り付けてください。','err'); return null; }
+  addMsg(i,'ユーザー',text,'u'); busy(i,true);
+  try{
+    const reply = await callAI(ai, ai.history, text, {images});
+    ai.history.push({role:'user',text}); ai.history.push({role:'assistant',text:reply});
+    addMsg(i, PROVIDERS[ai.provider].label + (ai.role?' / '+ai.role:''), reply, 'a');
+    S.log.push({who:(ai.role||`CH0${i+1}`), text:reply, at:stampNow().time});
+    return reply;
+  }catch(e){ addMsg(i,'エラー',e.message,'err'); return null; }
+  finally{ busy(i,false); }
+}
+async function userSend(){
+  const text=$('#u-text').value.trim();
+  if(!text && !S.images.length){ toast('伝えたいことを書いてください'); return; }
+  const imgs=S.images.slice();
+  S.log.push({who:'オーナー',text,at:stampNow().time});
+  $('#u-text').value=''; S.images=[]; renderThumbs();
+  const h=S.hostIndex;
+  S.ais[h].on = true; updateTape(h);
+  const round=[];
+  const hostReply = await sendTo(h, text, imgs);
+  if(hostReply) round.push(`【ホスト：${S.ais[h].role||'進行役'}】\n${hostReply}`);
+  for(let i=0;i<S.ais.length;i++){
+    if(i===h || !S.ais[i].on) continue;
+    const ctx = round.length
+      ? `【ユーザーの発言】\n${text}\n\n${round.join('\n\n')}\n\nこれを踏まえて、あなたの役割の立場から発言してください。すでに出ている意見の繰り返しは避け、賛成なら理由を、違う見方があるなら必ずそれを述べてください。`
+      : text;
+    const rep2 = await sendTo(i, ctx, imgs);
+    if(rep2) round.push(`【${S.ais[i].role||'参加者'}】\n${rep2}`);
+  }
+}
+let RUN={stop:false,busy:false};
+function runUI(on){
+  RUN.busy=on;
+  $('#btnStop').style.display = on?'inline-block':'none';
+  ['btnTurn1','btnTurn3','btnUserSend','btnBrief'].forEach(id=>{ const b=$('#'+id); if(b) b.disabled=on; });
+}
+async function runTurns(n){
+  if(RUN.busy) return;
+  if(!S.project){ toast('先にプロジェクトを開いてください'); return; }
+  const order=[S.hostIndex].concat(S.ais.filter(a=>a.on && a.id!==S.hostIndex).map(a=>a.id));
+  if(!S.ais[S.hostIndex].on){ toast('ホストが休止中です'); return; }
+  RUN.stop=false; runUI(true);
+  try{
+    for(let t=1;t<=n;t++){
+      const round=[];
+      for(const i of order){
+        if(RUN.stop) throw new Error('__stop__');
+        const isHost = i===S.hostIndex;
+        const prev = round.length ? `\n\n【このターンでここまでに出た意見】\n${round.join('\n\n')}` : '';
+        const ask = isHost
+          ? `（進行：${t}ターン目）ここまでの議論を一歩前に進めてください。要約の繰り返しは不要です。論点を1つに絞り、具体案か判断を出し、他のメンバーに投げかける問いを最後に1つ書いてください。`
+          : `（${t}ターン目）ホストの投げかけに、あなたの役割の立場から答えてください。${prev}\n\nすでに出た意見の繰り返しは避け、賛成なら根拠を、違う見方があれば必ずそれを述べ、具体的な次の一手を1つ提案してください。`;
+        const rep2 = await sendTo(i, ask, []);
+        if(rep2) round.push(`【${S.ais[i].role||('CH0'+(i+1))}】\n${rep2}`);
+      }
+    }
+  }catch(e){ if(e.message!=='__stop__') toast('中断しました：'+e.message); else toast('止めました'); }
+  finally{ runUI(false); }
+}
+async function briefAll(){
+  const h=S.ais[S.hostIndex];
+  if(!keyFor(h)){ toast('ホストのAPIキーが未設定です'); return; }
+  wait(true,'前提を作成中','ホストが各AIへの前提文を書いています。');
+  try{
+    const roles=S.ais.map((a,i)=>`${i+1}. ${a.on?(a.role||'（役割未設定）'):'（この会議には参加しません）'}`).join('\n');
+    const prompt=`会議の前提文を作ってください。参加者の役割は次の通りです（あなた自身＝${S.hostIndex+1}番も含みます）。
+${roles}
+
+それぞれに送る指示文を作ってください。書式は次の例に従います。
+例）あなたはアーティストマネジメントのプロフェッショナルです。アーティストブランディングや収益性、スケジューリングを考えて判断してください。用意ができたら「会議の準備ができました」と発言してください。
+
+出力は次のJSONのみ。前置きもコードブロックも書かないでください。
+{"1":"...","2":"...","3":"..."}`;
+    const raw = await callAI(h, [], prompt, {system:'あなたは会議の進行役です。指示された形式のJSONだけを返します。'});
+    let obj; try{ obj=JSON.parse(raw.replace(/```json|```/g,'').trim()); }catch(e){ obj=null; }
+    S.ais.forEach((a,i)=>{
+      if(!a.on) return;
+      const t = obj ? (obj[String(i+1)]||'') : `あなたは「${a.role||'会議参加者'}」です。憲章を前提に判断してください。用意ができたら「会議の準備ができました」と発言してください。`;
+      const box=document.querySelector(`[data-compose="${i}"]`); if(box) box.value=t;
+    });
+    wait(false); toast('各ウインドウに前提文を入れました。送信ボタンはご自分で押してください');
+  }catch(e){ wait(false); toast('前提文の作成に失敗しました：'+e.message); }
+}
+
+/* ---------- 画像ドロップ ---------- */
+function renderThumbs(){
+  const w=$('#u-thumbs'); w.innerHTML='';
+  S.images.forEach((im,idx)=>{
+    const d=document.createElement('div'); d.className='thumb';
+    const img=document.createElement('img'); img.src=`data:${im.mime};base64,${im.data}`; d.appendChild(img);
+    const b=document.createElement('button'); b.textContent='×'; b.onclick=()=>{S.images.splice(idx,1);renderThumbs();}; d.appendChild(b);
+    w.appendChild(d);
+  });
+}
+function readImage(file){
+  return new Promise(res=>{ const r=new FileReader();
+    r.onload=()=>res({mime:file.type,data:String(r.result).split(',')[1],name:file.name}); r.readAsDataURL(file); });
+}
+
+/* ---------- 保存・議事録・印刷 ---------- */
+function costReport(){
+  const m=S.cost.meeting.ch, d=costDay();
+  const line=(t,c,i)=>`- ${t}：${c.req}回 / 入力${c.i.toLocaleString()} / 出力${c.o.toLocaleString()} tok / ${S.cost.freeMode?'¥0（無料枠）':fmtYen(yenOf(c.usd))}`;
+  const totU=m.reduce((a,c)=>a+c.usd,0);
+  return `\n\n---\n\n## この会議の使用量\n`
+    + m.map((c,i)=>line(`CH0${i+1} ${S.ais[i].role||PROVIDERS[S.ais[i].provider].label}（${S.ais[i].model}）`,c,i)).join('\n')
+    + `\n- **合計：${S.cost.freeMode?'¥0（無料枠）':fmtYen(yenOf(totU))}**`
+    + `\n- 本日ここまでの合計：${S.cost.freeMode?'¥0（無料枠）':fmtYen(dayYen())}`
+    + (S.cost.freeMode?'':`\n- 単価の確認日：${S.cost.date} ／ 為替 1USD=${S.cost.fx}円（概算です）`);
+}
+function logText(){
+  return S.log.map(l=>`＜${l.who}＞　${l.at}\n${l.text}`).join('\n\n');
+}
+async function makeMinutes(){
+  const h=S.ais[S.hostIndex];
+  const members=S.ais.filter(a=>a.on).map(a=>(a.id===S.hostIndex?'★':'')+'＜'+(a.role||`CH0${a.id+1}`)+'＞').join(' / ');
+  const head=`# ${S.project.name}　${S.agendaTitle}\n\n`
+    + `開催日時：${S.startedAt.date} ${S.startedAt.time}　／　参加：＜オーナー＞ / ${members}\n`;
+  const f=n=>{ const x=(S.project.followers||{})[n]; return x?num(x):'—'; };
+  const snsLine = `SNS：Instagram ${f('ig')} ／ X ${f('x')} ／ TikTok ${f('tt')} ／ YouTube ${f('yt')}\n`;
+
+  let summary='';
+  if(keyFor(h) && S.log.length){
+    try{
+      summary = await callAI(h, [], `この会議の要点を、A4用紙1枚に収まる分量でまとめてください。
+
+【厳守】
+- 全体で1200文字以内。箇条書き中心。前置き・あいさつ・感想は書かない
+- 各項目は1行1件、長くても2行。誰の意見かは＜マネージャー＞のように役割名で示す
+- 決まっていないことを決まったように書かない
+
+【見出しはこの5つだけ】
+## 結論・決定事項
+## 主な論点
+## 保留・未決
+## 宿題（担当と期限が分かるもの）
+## 次回の再開ポイント
+
+--- 会議ログ ---
+${logText()}`, {system:'あなたは会議の書記です。日本語のMarkdownで、要点だけを短く書きます。冗長な説明は一切しません。'});
+    }catch(e){ summary='（要点の自動生成に失敗：'+e.message+'）'; }
+  } else {
+    summary='（ホストのAPIキーが未設定、または発言がないため要点は未作成です）';
+  }
+
+  const page1 = head + snsLine + '\n' + summary + costReport();
+  // 「結論・決定事項」の部分を抜き出して台帳に積む
+  try{
+    const m=summary.match(/##\s*結論・決定事項\s*\n([\s\S]*?)(?=\n##\s|$)/);
+    const dec=(m? m[1] : '').trim();
+    if(dec){
+      S.project.decisions = Array.isArray(S.project.decisions) ? S.project.decisions
+        : (typeof S.project.decisions==='string' && S.project.decisions.trim()
+            ? [{d:'（過去分）',agenda:'',text:S.project.decisions.trim()}] : []);
+      const key=`${S.startedAt.date}|${S.agendaTitle}`;
+      const idx=S.project.decisions.findIndex(x=>`${x.d}|${x.agenda}`===key);
+      const rec={d:S.startedAt.date, agenda:S.agendaTitle, text:dec};
+      if(idx>=0) S.project.decisions[idx]=rec; else S.project.decisions.push(rec);
+    }
+  }catch(e){}
+  const page2 = `## 会議の記録（全文）\n\n${logText()}`;
+  S.lastParts = {page1, page2};
+  return page1 + '\n\n---\n\n' + page2;
+}
+async function saveAll(){
+  if(!S.project){ toast('プロジェクトがありません'); return; }
+  S.agendaTitle = $('#d-agenda').value.trim() || S.agendaTitle || '無題の議題';
+  ['ig','x','tt','yt'].forEach(k=>{
+    S.project.followers=S.project.followers||{};
+    const v=$('#i-'+k).value.trim();
+    S.project.followers[k]=v;
+    const n=Number(String(v).replace(/[^\d]/g,''));
+    if(n){ const st=latestStat(k); if(!st || st.n!==n) recordStat(k,n); }
+  });
+  renderMeterStats();
+  S.project.updated = stampNow().iso;
+  wait(true,'保存中','ホストが議事録をまとめています。');
+  const minutes = await makeMinutes();
+  const st = S.startedAt||stampNow();
+  const base = `${st.file}_${safeName(S.agendaTitle)}`;
+  const payload = { project:S.project.name, agenda:S.agendaTitle, startedAt:st.iso,
+    host:S.hostIndex, ais:S.ais.map(a=>({provider:a.provider,model:a.model,role:a.role,history:a.history})), log:S.log };
+  try{
+    if(S.mode==='fs' && S.projDirHandle){
+      await writeFile(S.projDirHandle, `議事録_${base}.md`, minutes);
+      await writeFile(S.projDirHandle, `会議データ_${base}.json`, JSON.stringify(payload,null,2));
+      await writeFile(S.projDirHandle, '憲章.md', S.project.charter||'');
+      await writeFile(S.projDirHandle, 'project.json', JSON.stringify(S.project,null,2));
+      toast('保存しました：議事録_'+base+'.md');
+    } else {
+      S.project.agendas = S.project.agendas||[];
+      S.project.agendas.unshift({file:`議事録_${base}.md`, minutes, data:payload});
+      S.projects = S.projects.filter(p=>p.name!==S.project.name); S.projects.unshift(S.project); saveLocal();
+      download(`議事録_${base}.md`, minutes);
+      toast('ブラウザに保存し、議事録をダウンロードしました');
+    }
+    S.lastMinutes = minutes;
+  }catch(e){ toast('保存に失敗しました：'+e.message); }
+  wait(false);
+}
+async function doPrint(){
+  if(!S.lastParts){ wait(true,'準備中','ホストが議事録をまとめています。'); S.lastMinutes = await makeMinutes(); wait(false); }
+  const parts=S.lastParts||{page1:S.lastMinutes||'',page2:''};
+  const a=$('#printArea'); a.innerHTML='';
+  const p1=document.createElement('pre'); p1.className='pg'; p1.textContent=parts.page1;
+  const p2=document.createElement('pre'); p2.className='pg brk'; p2.textContent=parts.page2;
+  a.appendChild(p1); if(parts.page2) a.appendChild(p2);
+  window.print();
+}
+
+/* ---------- フォロワー数の取得 ---------- */
+const SNSKEY={ig:{name:'Instagram',f:'ig'},x:{name:'X',f:'x'},tt:{name:'TikTok',f:'tt'},yt:{name:'YouTube',f:'yt'}};
+function statsAll(){ S.project.stats=S.project.stats||{ig:[],x:[],tt:[],yt:[]};
+  ['ig','x','tt','yt'].forEach(k=>{ if(!Array.isArray(S.project.stats[k])) S.project.stats[k]=[]; });
+  return S.project.stats; }
+function latestStat(k){ const a=statsAll()[k]; return a.length? a[a.length-1] : null; }
+function prevStat(k){ const a=statsAll()[k]; return a.length>1? a[a.length-2] : null; }
+function recordStat(k,n){
+  const a=statsAll()[k], d=stampNow().date;
+  const last=a[a.length-1];
+  if(last && last.d===d) last.n=n;            // 同じ日なら上書き
+  else if(!last || last.n!==n) a.push({d,n}); // 変化がなければ増やさない
+  else last.d=d;                              // 数字が同じなら日付だけ更新
+  if(a.length>400) a.splice(0, a.length-400);
+}
+function setFollower(k,n,record=true){
+  if(n===null||n===undefined||isNaN(n)) return false;
+  n=Number(n);
+  $('#i-'+k).value=n; $('#m-'+k).textContent=num(n);
+  S.project.followers=S.project.followers||{}; S.project.followers[k]=String(n);
+  if(record) recordStat(k,n);
+  renderMeterStats();
+  return true;
+}
+function renderMeterStats(){
+  if(!S.project) return;
+  ['ig','x','tt','yt'].forEach(k=>{
+    const el=$('#s-'+k); if(!el) return;
+    const cur=latestStat(k), pr=prevStat(k);
+    if(!cur){ el.textContent='未取得'; return; }
+    const day=cur.d.replace(/-/g,'/');
+    if(!pr){ el.innerHTML=`<b>${day}</b> 取得`; return; }
+    const diff=cur.n-pr.n;
+    const cls=diff>0?'up':(diff<0?'dn':'');
+    const sign=diff>0?'+':'';
+    el.innerHTML=`<b>${day}</b> 取得<br>前回(${pr.d.slice(5).replace('-','/')})比 <span class="${cls}">${sign}${diff.toLocaleString('ja-JP')}</span>`;
+  });
+}
+async function ytApi(){
+  const url=(S.project?.sns?.yt)||''; if(!url) throw new Error('YouTubeのURLが憲章にありません');
+  let key=S.ytKey;
+  if(!key){ key=prompt('YouTube Data API のキー（あれば正確に取得できます。無ければキャンセルでAI検索に切り替えます）')||''; if(!key) throw new Error('skip'); S.ytKey=key; saveLocal(); }
+  let q;
+  const m1=url.match(/channel\/(UC[\w-]+)/), m2=url.match(/@([\w.\-]+)/);
+  if(m1) q=`id=${m1[1]}`; else if(m2) q=`forHandle=@${encodeURIComponent(m2[1])}`; else throw new Error('チャンネルURLを判別できませんでした');
+  const r=await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&${q}&key=${encodeURIComponent(key)}`);
+  const j=await r.json();
+  if(!r.ok) throw new Error(j.error?.message||'取得エラー');
+  const n=j.items?.[0]?.statistics?.subscriberCount;
+  if(!n) throw new Error('チャンネルが見つかりませんでした');
+  return Number(n);
+}
+function parseCount(v){
+  if(v===null||v===undefined) return null;
+  if(typeof v==='number') return Math.round(v);
+  let t=String(v).trim().replace(/[,\s]/g,'').replace(/人|フォロワー|subscribers?/gi,'');
+  const m=t.match(/^([\d.]+)(万|万人|K|k|M|m|B)?$/);
+  if(!m){ const d=t.match(/\d+/); return d?Number(d[0]):null; }
+  const n=parseFloat(m[1]); if(isNaN(n)) return null;
+  const mul={'万':1e4,'万人':1e4,'K':1e3,'k':1e3,'M':1e6,'m':1e6,'B':1e9}[m[2]]||1;
+  return Math.round(n*mul);
+}
+function followNote(msg){ const el=$('#followNote'); if(el) el.textContent=msg; }
+function searchWarn(){
+  if(LAST.searched && !LAST.grounded) return '※ウェブ検索が働いていません。AIの記憶による数字の可能性が高いので、必ず実際の画面で確認してください';
+  return LAST.sources.length ? `参照：${LAST.sources.slice(0,3).join(' / ')}` : '';
+}
+const SNSQ={ig:'instagram.com',x:'x.com',tt:'tiktok.com',yt:'youtube.com'};
+function handleOf(url){ const m=(url||'').match(/@?([\w.\-]+)\/?$/); return m?m[1]:''; }
+const SBSITE={yt:'socialblade.com/youtube',tt:'socialblade.com/tiktok',ig:'socialblade.com/instagram'};
+/* 1つのSNSだけを、SocialBladeを名指しで探させる */
+async function aiFollowerOne(k){
+  const h=S.ais[S.hostIndex];
+  if(!keyFor(h)) throw new Error('ホストのAPIキーが未設定です');
+  const sns=S.project?.sns||{}, nm=S.project?.name||'';
+  const url=sns[k]||'', hd=handleOf(url).replace(/^@/,'');
+  const sb=sbUrl(k);
+  const queries = k==='x'
+    ? [`"${hd}" x.com フォロワー`, `${nm} X フォロワー数`, `site:x.com ${hd}`]
+    : [`socialblade ${nm} ${SNSKEY[k].name}`, `site:${SBSITE[k]} ${hd}`, `"${hd}" ${SNSQ[k]} フォロワー`, `${nm} ${SNSKEY[k].name} フォロワー数`];
+  const sbLine = k==='x'
+    ? 'X（Twitter）は2025年3月にSocialBladeから削除されているので、Xのプロフィールページか検索結果の表示で確認してください。'
+    : `SocialBladeのページ（${sb||SBSITE[k]}）を最優先で確認してください。ページの説明文に「5.04K followers」のような数字が出ることがあります。`;
+
+  const prompt=`アーティスト「${nm}」の ${SNSKEY[k].name} の${k==='yt'?'チャンネル登録者数':'フォロワー数'}を、ウェブ検索で調べてください。この1件だけに集中してください。
+
+アカウント：${url||'（URL未登録）'}${hd?`（ハンドル: ${hd}）`:''}
+${sbLine}
+
+【必ず次の検索を順に試してください】
+${queries.map((q,i)=>`${i+1}. ${q}`).join('\n')}
+
+検索結果のスニペットに「4430 人以上のフォロワー」「5.04K followers」「1.2万人」のような表記が出ることが多いので、それを拾ってください。推測で数字を作らないこと。
+
+【回答の書き方】
+まず調べた過程を2〜3行で書き、最後の行に必ず次の形式だけを書いてください。
+数値: 4430
+出典: https://...
+分からなかった場合は「数値: 不明」と書いてください。`;
+
+  const rep = await callAI(h, [], prompt, {search:true,
+    system:'あなたはリサーチ担当です。必ずウェブ検索を実行し、検索結果に書かれていた数字だけを報告します。'});
+  const grounded=LAST.grounded, srcs=LAST.sources.slice();
+  LAST.mode='search';
+  LAST.report = (LAST.report? LAST.report+'\n\n':'') + `━━ ${SNSKEY[k].name} ━━\n` + rep;
+  LAST.grounded=grounded; LAST.sources=srcs;
+
+  let n=null, src='';
+  const mv=rep.match(/数値\s*[:：]\s*([^\n]+)/);
+  if(mv && !/不明|不詳|なし/.test(mv[1])) n=parseCount(mv[1].trim().replace(/,/g,''));
+  const ms=rep.match(/出典\s*[:：]\s*(\S+)/); if(ms) src=ms[1];
+  if(n===null) n=scrapeReport(rep, k);
+  return {n, src, conf:''};
+}
+async function aiFollowers(kinds){
+  LAST.report='';
+  const out={note:''};
+  for(const k of kinds){
+    try{ out[k] = await aiFollowerOne(k); }
+    catch(e){ out[k]={n:null,src:'',conf:''}; out.note=e.message; }
+  }
+  LAST.raw='';
+  return out;
+}
+/* SocialBladeのページを読み取りサービス経由で取得して解析する */
+async function proxyFollower(k){
+  const u=sbUrl(k);
+  if(!u) throw new Error('SocialBladeのURLを作れません');
+  if(!S.proxyOn) throw new Error('プロキシ取得はオフです');
+  const tmpl=S.proxy||'https://r.jina.ai/{url}';
+  const target = tmpl.includes('{url}') ? tmpl.replace('{url}', u) : tmpl+u;
+  const ctl=new AbortController(); const to=setTimeout(()=>ctl.abort(), 25000);
+  try{
+    const r=await fetch(target,{signal:ctl.signal});
+    if(!r.ok) throw new Error('読み取りサービスが応答しません（'+r.status+'）');
+    const txt=await r.text();
+    if(/just a moment|cloudflare|captcha/i.test(txt.slice(0,2000))) throw new Error('SocialBlade側のボット対策で読めませんでした');
+    const res=parseSBPage(txt);
+    LAST.mode='proxy';
+    LAST.report=(LAST.report?LAST.report+'\n\n':'')
+      + `━━ ${SNSKEY[k].name}（SocialBladeを直接読み取り）━━\n`
+      + `読み取り結果：${res? `${res.n.toLocaleString('ja-JP')}（見出しの表示は約${res.approx.toLocaleString('ja-JP')}／${res.exact?'日別表の実数を採用':'見出しの概数'}）` : '数字を見つけられませんでした'}\n\n`
+      + txt.slice(0,1500);
+    if(!res) throw new Error('ページから数字を見つけられませんでした');
+    return res;
+  } finally { clearTimeout(to); }
+}
+/* Xのフォロワー数：ミラーサイトや検索結果ページから拾う */
+function parseXPage(text){
+  const t=cleanSB(text);
+  const pats=[
+    // 「4440 人以上のフォロワー」「4,440 人のフォロワー」「4.4万人のフォロワー」（改行をまたがない）
+    /([\d][\d,\.]*[ 　]?[KMB万]?)[ 　]*(?:人)?(?:以上)?(?:の)?[ 　]*(?:フォロワー|followers)/i,
+    // 「フォロワー 4,440」「Followers 4,430」
+    /(?:フォロワー|followers)[^\d\n]{0,25}?([\d][\d,\.]*[ 　]?[KMB万]?)/i
+  ];
+  for(const re of pats){
+    const m=t.match(re);
+    if(m){ const n=toNum(m[1]); if(n && n>0 && n<2e9) return n; }
+  }
+  return null;
+}
+async function proxyX(){
+  const u=(S.project?.sns||{}).x||'';
+  const h=handleOf(u).replace(/^@/,'');
+  if(!h) throw new Error('XのURLが憲章に入っていません');
+  if(!S.proxyOn) throw new Error('自動取得（プロキシ）はオフです');
+  const tmpl=S.proxy||'https://r.jina.ai/{url}';
+  const tried=[];
+
+  // ⓪ Xの「フォローボタン」用の公開データ（残っていれば一番正確）
+  const info=`https://cdn.syndication.twimg.com/widgets/followbutton/info.json?screen_names=${encodeURIComponent(h)}`;
+  for(const target of [info, (tmpl.includes('{url}')?tmpl.replace('{url}',info):tmpl+info)]){
+    try{
+      const r=await fetch(target);
+      if(!r.ok){ tried.push(`フォローボタン用データ → ${r.status}`); continue; }
+      const txt=await r.text();
+      const m=txt.match(/"followers_count"\s*:\s*(\d+)/);
+      if(m){
+        const n=Number(m[1]);
+        LAST.mode='proxy';
+        LAST.report=(LAST.report?LAST.report+'\n\n':'')+`━━ X（Xの公開データ）━━\n読み取り結果：${n.toLocaleString('ja-JP')}\n\n`+txt.slice(0,600);
+        if(n) return {n, exact:true, approx:n, src:'Xの公開データ'};
+      }
+      tried.push('フォローボタン用データ → 数字なし');
+    }catch(e){ tried.push('フォローボタン用データ → '+e.message); }
+  }
+  for(const src of (S.xSources||[])){
+    const target0=src.replace('{h}', encodeURIComponent(h)).replace('{handle}', encodeURIComponent(h));
+    const target=tmpl.includes('{url}') ? tmpl.replace('{url}', target0) : tmpl+target0;
+    try{
+      const ctl=new AbortController(); const to=setTimeout(()=>ctl.abort(), 20000);
+      const r=await fetch(target,{signal:ctl.signal}); clearTimeout(to);
+      if(!r.ok){ tried.push(`${target0} → ${r.status}`); continue; }
+      const txt=await r.text();
+      const n=parseXPage(txt);
+      LAST.mode='proxy';
+      LAST.report=(LAST.report?LAST.report+'\n\n':'')
+        + `━━ X（${target0}）━━\n読み取り結果：${n? n.toLocaleString('ja-JP') : '数字なし'}\n\n` + txt.slice(0,1200);
+      if(n) return {n, exact:false, approx:n, src:target0};
+      tried.push(`${target0} → 数字が見つからず`);
+    }catch(e){ tried.push(`${target0} → ${e.message}`); }
+  }
+  throw new Error(tried.join(' ／ '));
+}
+
+/* 取得に失敗したとき、貼り付け画面をその場で開いてあげる */
+function offerPaste(k){
+  const u = k==='x' ? (xLinks()[0]||{}).u : sbUrl(k);
+  openBridge('sb');
+  const sel=$('#sbPlat'); if(sel) sel.value=k;
+  $('#bridgeNote').textContent = k==='x'
+    ? 'Xは自動アクセスが遮断されています。開いたプロフィールの「4,448 フォロワー」の部分を含めてコピーし、ここに貼り付けてください（上の欄に直接入力しても構いません）。'
+    : `自動では取れませんでした。${SNSKEY[k].name}のページを開くので、検索して候補をクリック→⌘+A →⌘+C→ここに貼り付けてください。`;
+  if(u) window.open(k==='x'?u:(SBHOME[k]||u),'_blank','noopener');
+}
+function askX(){
+  return new Promise(res=>{
+    const st=latestStat('x');
+    $('#xInput').value = st? st.n : ($('#i-x').value||'');
+    $('#xPrev').textContent = st ? `前回：${num(st.n)}（${st.d.replace(/-/g,'/')}）` : 'まだ記録がありません';
+    $('#xModal').classList.add('on');
+    $('#xInput').focus();
+    const done=v=>{ $('#xModal').classList.remove('on'); cleanup(); res(v); };
+    const onSave=()=>{ const n=Number(String($('#xInput').value).replace(/[^\d]/g,'')); done(n||null); };
+    const onSkip=()=>done(null);
+    const onOpen=()=>{ const u=(xLinks()[0]||{}).u; if(u) window.open(u,'_blank','noopener'); else toast('XのURLが憲章に入っていません'); };
+    const onKey=e=>{ if(e.key==='Enter') onSave(); if(e.key==='Escape') onSkip(); };
+    function cleanup(){ $('#btnXSave').onclick=null; $('#btnXSkip').onclick=null; $('#btnXOpen').onclick=null; $('#xInput').onkeydown=null; }
+    $('#btnXSave').onclick=onSave; $('#btnXSkip').onclick=onSkip; $('#btnXOpen').onclick=onOpen; $('#xInput').onkeydown=onKey;
+  });
+}
+async function fetchFollower(k){
+  if(!S.project){ toast('先にプロジェクトを開いてください'); return; }
+  const btn=document.querySelector(`[data-fetch="${k}"]`); if(btn){ btn.disabled=true; btn.textContent='取得中…'; }
+  const tried=[];
+  try{
+    // ① YouTubeは公式APIが最優先（唯一の正確な自動取得）
+    if(k==='yt' && S.ytKey){
+      try{ setFollower('yt', await ytApi()); followNote(`YouTube ${num($('#i-yt').value)}（公式API・正確）`); toast('登録者数を取得しました'); return; }
+      catch(e){ tried.push('公式API：'+e.message); }
+    }
+    // ② X は自動取得できないので手入力
+    if(k==='x'){
+      const n=await askX();
+      if(n && setFollower('x', n)){ saveProjectQuiet(); toast('Xのフォロワー数を保存しました'); }
+      return;
+    }
+    // ② SocialBladeを読み取りサービス経由で取得
+    if(k!=='x'){
+      try{
+        const r=await proxyFollower(k);
+        if(setFollower(k, r.n)){
+          followNote(`${SNSKEY[k].name} ${num(r.n)}（SocialBlade${r.exact?'の日別表・実数':'の見出し・概数'}）`);
+          saveProjectQuiet(); toast('SocialBladeから取得しました'); return;
+        }
+      }catch(e){ tried.push('SocialBlade自動取得：'+e.message); }
+    }
+    // ③ AI検索（当たれば拾う）
+    if(keyFor(S.ais[S.hostIndex])){
+      try{
+        const o=await aiFollowers([k]); const r=o[k]||{};
+        if(setFollower(k, r.n)){
+          followNote(`${SNSKEY[k].name} ${num(r.n)}（AI検索・概算${r.src?'／'+r.src:''}）`);
+          saveProjectQuiet(); toast('取得しました（概算です。実画面での確認をおすすめします）',5000); return;
+        }
+        tried.push('AI検索：数字が見つかりませんでした');
+      }catch(e){ tried.push('AI検索：'+e.message); }
+    }
+    // ④ 貼り付けに誘導
+    followNote(`${SNSKEY[k].name} は自動で取れませんでした（${tried.join(' ／ ')}）`);
+    offerPaste(k);
+  }catch(e){ toast('取得に失敗：'+e.message, 5000); }
+  finally{ if(btn){ btn.disabled=false; btn.textContent='自動取得'; } }
+}
+async function fetchAllFollowers2(){
+  if(!S.project){ toast('先にプロジェクトを開いてください'); return; }
+  wait(true,'調査中','ホストがSNSのフォロワー数を調べています。');
+  let ytDone=false;
+  try{ setFollower('yt', await ytApi()); ytDone=true; }catch(e){}
+  try{
+    const kinds=['ig','x','tt'].concat(ytDone?[]:['yt']);
+    const o=await aiFollowers(kinds);
+    let hit=0; const parts=[];
+    kinds.forEach(k=>{
+      const r=o[k]||{};
+      if(setFollower(k,r.n)){ hit++; parts.push(`${SNSKEY[k].name} ${num(r.n)}${r.conf?`(${r.conf})`:''}`); }
+      else parts.push(`${SNSKEY[k].name} 取得できず`);
+    });
+    wait(false);
+    followNote(parts.join('／')+(o.note?`　${o.note}`:'')+'　'+searchWarn());
+    toast(`${hit+(ytDone?1:0)}件を取得しました`, 5000);
+  }catch(e){ wait(false); toast('取得に失敗：'+e.message, 5000); }
+}
+
+/* =====================================================================
+   イベント
+   ===================================================================== */
+$('#btnPickRoot').onclick=pickRoot;
+$('#btnChangeRoot').onclick=pickRoot;
+$('#btnResume').onclick=async()=>{ if(await resumeRoot()) toast('前回の保存先に接続しました'); else toast('接続できませんでした。もう一度フォルダを選んでください'); };
+$('#btnNewProj').onclick=()=>{ show('s-wiz'); wizFill(); fillHostSelect(); wizError(''); wizGo(0); };
+$('#btnBackBoot').onclick=()=>show('s-boot');
+$('#btnPrev').onclick=()=>wizGo(W.step-1);
+$('#btnNext').onclick=()=>{ wizGrab(); if(W.step===0 && !W.data.name){ toast('プロジェクト名を入れてください'); return; } wizGo(W.step+1); };
+$('#btnWizCancel').onclick=()=>show('s-boot');
+$('#btnRestart').onclick=()=>{ wizFill(); fillHostSelect(); wizError(''); wizGo(0); toast('入力内容はそのまま残しています'); };
+$('#w-host').onchange=e=>{
+  S.hostIndex=+e.target.value; $('#w-hostmodel').value=S.ais[S.hostIndex].model;
+  saveLocal(); renderChannels();
+};
+$('#w-hostmodel').oninput=e=>{ S.ais[S.hostIndex].model=e.target.value.trim(); saveLocal(); };
+$('#w-gkey').oninput=e=>{ S.gkey=e.target.value.trim(); const g=$('#gkey'); if(g) g.value=S.gkey; saveLocal(); };
+$('#btnWizModels').onclick=async()=>{
+  if(!S.gkey){ $('#w-hoststatus').textContent='先にGemini APIキーを貼り付けてください'; return; }
+  $('#w-hoststatus').textContent='モデル一覧を取得しています…';
+  try{
+    await fetchGeminiModels(S.gkey);
+    S.ais.forEach((a,i)=>{ if(a.provider==='gemini' && !S.gmodels.includes(a.model)) a.model=pickModel(i===2?'light':'main'); });
+    $('#w-hostmodel').value=S.ais[S.hostIndex].model; saveLocal(); renderChannels();
+    $('#w-hoststatus').textContent=`使えるモデル${S.gmodels.length}件。ホストは ${S.ais[S.hostIndex].model} を使います`;
+  }catch(e){ $('#w-hoststatus').textContent='取得に失敗：'+e.message; }
+};
+$('#btnWizTest').onclick=async()=>{
+  const ai=S.ais[S.hostIndex];
+  if(!keyFor(ai)){ $('#w-hoststatus').textContent='APIキーが空です'; return; }
+  $('#w-hoststatus').textContent='接続を確認しています…';
+  try{
+    const r=await callAI(ai, [], 'テストです。「接続できました」とだけ返してください。', {search:false, system:'簡潔に答えます。'});
+    $('#w-hoststatus').textContent=`OK：${r.slice(0,40)}（モデル ${ai.model}）／ウェブ検索を確認中…`;
+    let sres='使えません（憲章は入力内容ベースになります。別のモデルを試してください）';
+    try{
+      await callAI(ai, [], '「Anthropic」の公式サイトのURLをウェブ検索で調べて、URLだけ答えてください。', {search:true, system:'簡潔に答えます。'});
+      if(LAST.grounded) sres='OK（実際に検索が走りました）';
+    }catch(e2){}
+    $('#w-hoststatus').textContent=`接続OK（モデル ${ai.model}）／ウェブ検索：${sres}`;
+  }catch(e){ $('#w-hoststatus').textContent='NG：'+e.message; }
+};
+$('#btnMakeCharter').onclick=()=>buildCharter(true);
+$('#btnCharterNoAI').onclick=()=>buildCharter(false);
+$('#btnOpsAgenda').onclick=()=>openOps('act');
+$('#btnOpsDeck').onclick=()=>openOps('act');
+$('#btnOpsClose').onclick=()=>$('#opsModal').classList.remove('on');
+$('#btnSpotify').onclick=()=>window.open('https://artists.spotify.com/','_blank','noopener');
+$('#btnOpsSave').onclick=async()=>{
+  ['act','sch','bud','str'].forEach(t=>{
+    const k=OPSDEF[t].key;
+    const need = t==='act'?'what' : (t==='sch'?'task' : (t==='bud'?'name':null));
+    S.project[k]=(S.project[k]||[]).filter(r=> need ? String(r[need]||'').trim() : (r.listeners||String(r.note||'').trim()));
+  });
+  await saveProjectQuiet();
+  ['act','sch','bud','str'].forEach(renderOps);
+  renderAgendaStatus();
+  $('#opsModal').classList.remove('on');
+  toast('運営データを保存しました。次の発言から全員が前提にします');
+};
+$('#btnSaveExternal').onclick=async()=>{
+  if(!S.project){ toast('先にプロジェクトを開いてください'); return; }
+  S.project.external=$('#agExternal').value;
+  await saveProjectQuiet(); toast('共有事項を保存しました。次の会議から全員が前提にします');
+};
+$('#btnEditDecisions').onclick=()=>{
+  if(!S.project){ toast('先にプロジェクトを開いてください'); return; }
+  $('#decText').value=decisionsText();
+  $('#decModal').classList.add('on');
+};
+$('#btnDecClose').onclick=()=>$('#decModal').classList.remove('on');
+$('#btnDecSave').onclick=async()=>{
+  S.project.decisions=[{d:stampNow().date, agenda:'手で整理', text:$('#decText').value.trim()}];
+  await saveProjectQuiet(); $('#decModal').classList.remove('on');
+  renderAgendaStatus(); toast('決定事項を保存しました');
+};
+$('#btnStartAgenda').onclick=()=>{ const t=$('#newAgenda').value.trim(); if(!t){toast('議題を入れてください');return;} S.loadedMinutes=''; startMeeting(t); };
+$('#btnHome').onclick=async()=>{ if(S.mode==='fs') await scanProjects(); renderProjects(); show('s-boot'); };
+$('#btnBackAgenda') && ($('#btnBackAgenda').onclick=()=>{ renderAgendaStatus(); show('s-agenda'); });
+$('#btnSave').onclick=saveAll;
+$('#btnPrint').onclick=doPrint;
+/* ---------- SocialBlade 直リンク ---------- */
+function sbUrl(k){
+  const u=(S.project?.sns||{})[k]||''; if(!u) return '';
+  const h=handleOf(u).replace(/^@/,''); if(!h) return '';
+  if(k==='yt'){ const c=u.match(/channel\/(UC[\w-]+)/); return c?`https://socialblade.com/youtube/channel/${c[1]}`:`https://socialblade.com/youtube/handle/${h}`; }
+  if(k==='tt') return `https://socialblade.com/tiktok/user/${h}`;
+  if(k==='ig') return `https://socialblade.com/instagram/user/${h}`;
+  return ''; // X は 2025年3月に SocialBlade から削除された
+}
+const SBHOME={yt:'https://socialblade.com/youtube',tt:'https://socialblade.com/tiktok',ig:'https://socialblade.com/instagram'};
+function xLinks(){
+  const u=(S.project?.sns||{}).x||''; const h=handleOf(u).replace(/^@/,'');
+  if(!h) return [];
+  return [
+    {t:'Xのプロフィール', u:`https://x.com/${h}`},
+    {t:'Googleで確認', u:`https://www.google.com/search?q=${encodeURIComponent('"'+h+'" x.com フォロワー')}`}
+  ];
+}
+function renderSbLinks(){
+  const box=$('#sbLinks'); if(!box) return;
+  box.innerHTML='';
+  const lab=document.createElement('span'); lab.textContent='SOCIALBLADE：'; box.appendChild(lab);
+  let any=false;
+  ['yt','tt','ig'].forEach(k=>{
+    const u=sbUrl(k); if(!u) return; any=true;
+    const a=document.createElement('a'); a.href=u; a.target='_blank'; a.rel='noopener';
+    a.textContent=SNSKEY[k].name; box.appendChild(a);
+  });
+  if(!any) lab.textContent='SNSのURLを憲章に入れると、SocialBladeのリンクが出ます';
+  const xs=xLinks();
+  if(xs.length){
+    const l2=document.createElement('span'); l2.textContent='／ X（SocialBlade非対応）：'; box.appendChild(l2);
+    xs.forEach(x=>{ const a=document.createElement('a'); a.href=x.u; a.target='_blank'; a.rel='noopener'; a.textContent=x.t; box.appendChild(a); });
+  }
+  const note=document.createElement('span');
+  note.textContent='※数字は数時間〜1日遅れます。Instagram・TikTokは未登録の場合あり';
+  box.appendChild(note);
+}
+
+/* ---------- 調査ブリッジ ---------- */
+let BTASK='sns';
+function bridgePrompt(task){
+  const p=S.project||{}, sns=p.sns||{};
+  const links=['ig','x','tt','yt'].map(k=>`- ${SNSKEY[k].name}：${sns[k]||'無し'}${sbUrl(k)?`　（SocialBlade: ${sbUrl(k)}）`:''}`).join('\n');
+  if(task==='sns'){
+    return `あなたはリサーチ担当です。ウェブ検索を使って、アーティスト「${p.name||''}」の現在のSNSフォロワー数を調べてください。
+
+${links}
+
+【調べ方】
+- YouTube・TikTok・Instagram は、まず上のSocialBladeのURLを最優先で確認してください
+- X（Twitter）は2025年3月にSocialBladeから削除されているため、Xのプロフィールページや検索結果の表示で確認してください
+- 「4430 人以上のフォロワー」「12.3K followers」のような表記は 4430 / 12300 と実数に直してください
+- 見つからないものは「不明」と書いてください。推測の数字は書かないこと
+
+【回答の形式】必ずこの形で、余計な説明は最後にまとめてください。
+【フォロワー数】
+Instagram: 数字
+X: 数字
+TikTok: 数字
+YouTube: 数字
+【出典】
+各行に、参照したページのURLと確認日時
+【補足】
+気づいたこと（急増している、非公開、SocialBlade未登録など）`;
+  }
+  return `あなたは音楽業界のアーティストマネジメント／ブランディングの専門家です。ウェブ検索を徹底的に使って、アーティスト「${p.name||''}」を売るために必要な情報を洗い出し、「憲章」の分析パートを日本語のMarkdownで書いてください。
+
+【プロフィール】
+${p.profile||'（記載なし）'}
+
+【ホームページ】${p.hp||'無し'}
+【SNS】
+${links}
+
+【NG（絶対にやらないこと）】
+${p.ng||'無し'}
+【マスト（必ず守ること）】
+${p.must||'無し'}
+
+【必ずこの見出しで書いてください】
+## 現在のブランディング
+## 浸透している年齢層・リスナー像
+## SNSごとの状況（伸びている投稿・動画の傾向と、その理由の分析）
+## 本人たちの発言・トーン
+## 競合と立ち位置
+## 売るために必要なこと（施策仮説を、優先順位をつけて具体的に）
+## 未確認事項
+
+事実として確認できたことと推測は必ず区別し、確認できなかったことは「未確認事項」に正直に書いてください。NGとマストは絶対条件として扱ってください。最後に、参照したURLの一覧を付けてください。`;
+}
+function openBridge(task){
+  if(!S.project){ toast('先にプロジェクトを開いてください'); return; }
+  BTASK=task||BTASK;
+  $$('[data-btask]').forEach(b=>b.classList.toggle('on', b.dataset.btask===BTASK));
+  const isSb = BTASK==='sb';
+  $('#sbPanel').style.display = isSb?'block':'none';
+  $('#bridgePrompt').style.display = isSb?'none':'block';
+  $('#bridgePromptLab').style.display = isSb?'none':'block';
+  $('#btnBridgeCopy').style.display = isSb?'none':'inline-block';
+  $$('[data-open]').forEach(b=>b.style.display = isSb?'none':'inline-block');
+  $('#btnBridgeCharterAdd').style.display = BTASK==='charter'?'inline-block':'none';
+  $('#btnBridgeCharterSet').style.display = BTASK==='charter'?'inline-block':'none';
+  $('#btnBridgeNums').style.display = BTASK==='charter'?'none':'inline-block';
+  if(!isSb) $('#bridgePrompt').value=bridgePrompt(BTASK);
+  $('#proxyOn').checked=S.proxyOn; $('#proxyUrl').value=S.proxy||'';
+  $('#xSrc').value=(S.xSources||[]).join('\n');
+  $('#bridgeNote').textContent = isSb
+    ? 'SocialBladeのページを丸ごと貼り付けて「数字を取り込む」を押してください。'
+    : (BTASK==='sns' ? '回答を貼り付けたら「数字を取り込む」を押してください。'
+                     : '回答を貼り付けたら「憲章に追記する」か「憲章を置き換える」を押してください。');
+  $('#bridgeModal').classList.add('on');
+}
+/* SocialBladeのページ本文から数字を取り出す
+   ① 広告・リンク・画像・他ユーザーの候補リストを削ぎ落とす
+   ② 見出しの「subscribers 14K」を概数として拾う
+   ③ 日別表があれば、その概数に最も近い値（13.6K → 13,600）を採用する */
+function cleanSB(text){
+  let t=String(text).replace(/\u00a0/g,' ');
+  const mc=t.indexOf('Markdown Content:');
+  if(mc>=0) t=t.slice(mc+17);
+  t=t.replace(/!\[[^\]]*\]\([^)]*\)/g,' ');   // 画像
+  t=t.replace(/\[[^\]]*\]\([^)]*\)/g,' ');     // リンク（他ユーザーの候補リストを含む）
+  t=t.replace(/https?:\/\/\S+/g,' ');            // 裸のURL
+  t=t.replace(/\$[\d.,]+\s*-\s*\$[\d.,KM]+/g,' '); // 推定収益（$4 - $63）
+  return t;
+}
+function toNum(str){ return parseCount(String(str).replace(/\s/g,'').replace(/,/g,'')); }
+function parseSBPage(text){
+  const t=cleanSB(text);
+  const WORD='(?:subscribers|followers|フォロワー|登録者)';
+  let approx=null;
+  const m1=t.match(new RegExp(WORD+'[^\\d]{0,30}?([\\d][\\d,\\.]*\\s*[KMB万]?)','i'));
+  const m2=t.match(new RegExp('([\\d][\\d,\\.]*\\s*[KMB万]?)\\s*'+WORD,'i'));
+  for(const m of [m1,m2]){ if(m){ const n=toNum(m[1]); if(n){ approx=n; break; } } }
+  if(!approx) return null;
+
+  // 日別表の行から候補を集める（K表記も拾う）
+  const rows=t.split(/\n/).filter(l=>/\d{4}-\d{2}-\d{2}/.test(l));
+  const cand=[];
+  [rows[0], rows[rows.length-1]].filter(Boolean).forEach(r=>{
+    [...String(r).matchAll(/([\d][\d,\.]*\s*[KMB万]?)/g)].forEach(m=>{
+      const v=toNum(m[1]);
+      if(v && Math.abs(v-approx)/approx <= 0.10) cand.push(v);
+    });
+  });
+  if(cand.length){
+    cand.sort((a,b)=>Math.abs(a-approx)-Math.abs(b-approx));
+    if(cand[0]!==approx) return {n:cand[0], exact:true, approx};
+    return {n:cand[0], exact:false, approx};
+  }
+  return {n:approx, exact:false, approx};
+}
+function openBridge(task){
+  if(!S.project){ toast('先にプロジェクトを開いてください'); return; }
+  BTASK=task||BTASK;
+  $$('[data-btask]').forEach(b=>b.classList.toggle('on', b.dataset.btask===BTASK));
+  const isSb = BTASK==='sb';
+  $('#sbPanel').style.display = isSb?'block':'none';
+  $('#bridgePrompt').style.display = isSb?'none':'block';
+  $('#bridgePromptLab').style.display = isSb?'none':'block';
+  $('#btnBridgeCopy').style.display = isSb?'none':'inline-block';
+  $$('[data-open]').forEach(b=>b.style.display = isSb?'none':'inline-block');
+  $('#btnBridgeCharterAdd').style.display = BTASK==='charter'?'inline-block':'none';
+  $('#btnBridgeCharterSet').style.display = BTASK==='charter'?'inline-block':'none';
+  $('#btnBridgeNums').style.display = BTASK==='charter'?'none':'inline-block';
+  if(!isSb) $('#bridgePrompt').value=bridgePrompt(BTASK);
+  $('#proxyOn').checked=S.proxyOn; $('#proxyUrl').value=S.proxy||'';
+  $('#bridgeNote').textContent = isSb
+    ? 'SocialBladeのページを丸ごと貼り付けて「数字を取り込む」を押してください。'
+    : (BTASK==='sns' ? '回答を貼り付けたら「数字を取り込む」を押してください。'
+                     : '回答を貼り付けたら「憲章に追記する」か「憲章を置き換える」を押してください。');
+  $('#bridgeModal').classList.add('on');
+}
+async function copyText(t){
+  try{ await navigator.clipboard.writeText(t); return true; }
+  catch(e){
+    const ta=document.createElement('textarea');
+    ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    let ok=false; try{ ok=document.execCommand('copy'); }catch(_){}
+    document.body.removeChild(ta); return ok;
+  }
+}
+function importNumbers(text){
+  const map={ig:['instagram','インスタ'],x:['x:','x：','twitter'],tt:['tiktok','ティックトック'],yt:['youtube','ユーチューブ','登録者']};
+  let hit=[], miss=[];
+  Object.keys(map).forEach(k=>{
+    let n=null;
+    for(const ln of text.split(/\n/)){
+      const low=ln.toLowerCase();
+      if(!map[k].some(x=>low.includes(x))) continue;
+      if(/不明|未登録|非公開|不詳/.test(ln)) { n=null; break; }
+      const mm=ln.match(/([\d,]+(?:\.\d+)?)\s*(万|K|k|M|m)?/);
+      if(mm){ const v=parseCount(mm[1].replace(/,/g,'')+(mm[2]||'')); if(v){ n=v; break; } }
+    }
+    if(n && setFollower(k,n)) hit.push(`${SNSKEY[k].name} ${num(n)}`); else miss.push(SNSKEY[k].name);
+  });
+  return {hit,miss};
+}
+$('#btnBridge').onclick=()=>openBridge('sns');
+$('#btnBridgeClose').onclick=()=>$('#bridgeModal').classList.remove('on');
+$('#btnBridgeCopy').onclick=async()=>{
+  const ok=await copyText($('#bridgePrompt').value);
+  toast(ok?'コピーしました。AIに貼り付けてください':'コピーできませんでした。手で選択してコピーしてください');
+};
+$('#btnSbOpen').onclick=()=>{
+  const k=$('#sbPlat').value;
+  const u = k==='x' ? (xLinks()[0]||{}).u : sbUrl(k);
+  if(!u){ toast('このSNSのURLが憲章に入っていません'); return; }
+  window.open(u,'_blank','noopener');
+};
+$('#proxyOn').onchange=e=>{ S.proxyOn=e.target.checked; saveLocal(); };
+$('#proxyUrl').oninput=e=>{ S.proxy=e.target.value.trim(); saveLocal(); };
+$('#xSrc').oninput=e=>{ S.xSources=e.target.value.split(/\n/).map(x=>x.trim()).filter(Boolean); saveLocal(); };
+$('#btnSbSearch').onclick=()=>{
+  const k=$('#sbPlat').value;
+  if(k==='x'){
+    const h=handleOf((S.project?.sns||{}).x||'').replace(/^@/,'');
+    if(!h){ toast('XのURLが憲章に入っていません'); return; }
+    window.open(`https://www.google.com/search?q=${encodeURIComponent(h+' X フォロワー')}`,'_blank','noopener');
+    toast('検索結果の「◯◯人以上のフォロワー」ごとコピーして貼り付けてください', 6000);
+    return;
+  }
+  window.open(SBHOME[k],'_blank','noopener');
+  copyText(S.project?.name||'').then(ok=>{ if(ok) toast('アーティスト名をコピーしました。検索窓に貼って、出てきた候補をクリック'); });
+};
+$('#btnBridgeNums').onclick=()=>{
+  const t=$('#bridgeIn').value.trim(); if(!t){ toast('内容を貼り付けてください'); return; }
+  if(BTASK==='sb'){
+    const k=$('#sbPlat').value;
+    const r = k==='x'
+      ? (()=>{ const n=parseXPage(t); return n?{n, exact:false, approx:n}:null; })()
+      : parseSBPage(t);
+    if(r && setFollower(k,r.n)){
+      $('#bridgeNote').textContent = r.exact
+        ? `${SNSKEY[k].name} に ${num(r.n)} を取り込みました（日別表の実数。見出しの表示は約${num(r.approx)}）`
+        : `${SNSKEY[k].name} に ${num(r.n)} を取り込みました（見出しの概数。正確な数字が必要なら手で直してください）`;
+      saveProjectQuiet(); toast('取り込みました');
+    } else {
+      $('#bridgeNote').textContent='数字を見つけられませんでした。統計ページ全体をコピーできているか確認してください（検索結果の一覧ページではなく、アーティスト個別のページです）。';
+      toast('数字を読み取れませんでした');
+    }
+    return;
+  }
+  const r=importNumbers(t);
+  $('#bridgeNote').textContent = `取り込み：${r.hit.join('／')||'なし'}${r.miss.length?`　取れなかったもの：${r.miss.join('・')}`:''}`;
+  saveProjectQuiet(); toast(r.hit.length?`${r.hit.length}件を取り込みました`:'数字を読み取れませんでした');
+};
+$('#btnBridgeCharterAdd').onclick=()=>bridgeCharter(false);
+$('#btnBridgeCharterSet').onclick=()=>bridgeCharter(true);
+async function bridgeCharter(replace){
+  const t=$('#bridgeIn').value.trim(); if(!t){ toast('回答を貼り付けてください'); return; }
+  const stamp=stampNow();
+  const block=`\n\n---\n\n# 外部AIによる調査（${stamp.date} ${stamp.time}）\n\n${t}\n`;
+  S.project.charter = replace ? charterFromInput({
+      name:S.project.name, profile:S.project.profile, hp:S.project.hp,
+      ig:S.project.sns?.ig, tt:S.project.sns?.tt, yt:S.project.sns?.yt, x:S.project.sns?.x,
+      ng:S.project.ng, must:S.project.must }, t)
+    : (S.project.charter||'')+block;
+  await saveProjectQuiet();
+  $('#bridgeNote').textContent = replace ? '憲章を置き換えました。3つのAIは次の発言からこの内容を前提にします。' : '憲章に追記しました。3つのAIは次の発言からこの内容を前提にします。';
+  toast('憲章を更新しました');
+}
+async function saveProjectQuiet(){
+  if(!S.project) return;
+  S.project.updated=stampNow().iso;
+  try{
+    if(S.mode==='fs' && S.projDirHandle){
+      await writeFile(S.projDirHandle,'憲章.md',S.project.charter||'');
+      await writeFile(S.projDirHandle,'project.json',JSON.stringify(S.project,null,2));
+    } else saveLocal();
+  }catch(e){}
+}
+async function fetchAllFollowers(){
+  if(!S.project){ toast('先にプロジェクトを開いてください'); return; }
+  wait(true,'取得中','SocialBladeから順番に読み取っています。');
+  const done=[], fail=[];
+  for(const k of ['yt','tt','ig']){
+    try{
+      if(k==='yt' && S.ytKey){ setFollower('yt', await ytApi()); done.push(`YouTube ${num($('#i-yt').value)}`); continue; }
+      const r = await proxyFollower(k);
+      if(setFollower(k,r.n)) done.push(`${SNSKEY[k].name} ${num(r.n)}${r.exact?'':'(概数)'}`); else fail.push(SNSKEY[k].name);
+    }catch(e){ fail.push(SNSKEY[k].name); }
+  }
+  wait(false);
+  const xn=await askX();
+  if(xn && setFollower('x', xn)) done.push(`X ${num(xn)}`); else fail.push('X');
+  saveProjectQuiet();
+  followNote(`取得：${done.join('／')||'なし'}${fail.length?`　／　取れなかった：${fail.join('・')}`:''}`);
+  toast(`${done.length}件を取得しました`, 5000);
+}
+/* =====================================================================
+   運営データ（施策ログ・スケジュール・予算・配信）
+   ===================================================================== */
+const OPSDEF={
+  act:{key:'actions', tbody:'#rowsAct', cols:[
+    {k:'d',type:'date'},{k:'ch',type:'select',opts:[['all','全体'],['ig','Instagram'],['x','X'],['tt','TikTok'],['yt','YouTube']]},
+    {k:'what',type:'text',ph:'例）リール投稿「新曲スタジオ風景」'},{k:'res',type:'text',ph:'例）3日で+120、保存が多い'}]},
+  sch:{key:'schedule', tbody:'#rowsSch', cols:[
+    {k:'d',type:'date'},{k:'task',type:'text',ph:'例）物販入稿'},{k:'owner',type:'text',ph:'例）ライブ制作'},{k:'done',type:'check'}]},
+  bud:{key:'budget', tbody:'#rowsBud', cols:[
+    {k:'name',type:'text',ph:'例）11/13東京ファイナル'},{k:'plan',type:'number',ph:'予算'},{k:'actual',type:'number',ph:'実績'},{k:'note',type:'text',ph:'メモ'}]},
+  str:{key:'streaming', tbody:'#rowsStr', cols:[
+    {k:'d',type:'date'},{k:'listeners',type:'number',ph:'月間リスナー'},{k:'note',type:'text',ph:'例）「◯◯」が伸びている / 保存率up'}]}
+};
+function opsArr(t){ const k=OPSDEF[t].key; S.project[k]=Array.isArray(S.project[k])?S.project[k]:[]; return S.project[k]; }
+function opsRow(t, row, i){
+  const tr=document.createElement('tr');
+  OPSDEF[t].cols.forEach(c=>{
+    const td=document.createElement('td');
+    if(c.type==='select'){
+      const sel=document.createElement('select');
+      c.opts.forEach(([v,l])=>{ const o=document.createElement('option'); o.value=v; o.textContent=l; sel.appendChild(o); });
+      sel.value=row[c.k]||c.opts[0][0]; sel.oninput=e=>row[c.k]=e.target.value; td.appendChild(sel);
+    } else if(c.type==='check'){
+      const cb=document.createElement('input'); cb.type='checkbox'; cb.style.width='auto'; cb.checked=!!row[c.k];
+      cb.onchange=e=>row[c.k]=e.target.checked; td.appendChild(cb);
+    } else {
+      const inp=document.createElement('input'); inp.type=c.type==='number'?'number':(c.type==='date'?'date':'text');
+      inp.value=row[c.k]||''; if(c.ph) inp.placeholder=c.ph;
+      inp.oninput=e=>{ row[c.k]=e.target.value; if(t==='bud') budSum(); };
+      td.appendChild(inp);
+    }
+    tr.appendChild(td);
+  });
+  const td=document.createElement('td');
+  const b=document.createElement('button'); b.className='del'; b.textContent='×'; b.title='この行を消す';
+  b.onclick=()=>{ opsArr(t).splice(i,1); renderOps(t); }; td.appendChild(b); tr.appendChild(td);
+  return tr;
+}
+function renderOps(t){
+  const tb=$(OPSDEF[t].tbody); if(!tb) return;
+  tb.innerHTML=''; opsArr(t).forEach((r,i)=>tb.appendChild(opsRow(t,r,i)));
+  if(t==='bud') budSum();
+}
+function budSum(){
+  const a=opsArr('bud');
+  const pl=a.reduce((x,r)=>x+(Number(r.plan)||0),0), ac=a.reduce((x,r)=>x+(Number(r.actual)||0),0);
+  const el=$('#budSum'); if(el) el.textContent=`予算 合計 ¥${pl.toLocaleString('ja-JP')}　／　実績 合計 ¥${ac.toLocaleString('ja-JP')}　／　差 ${ac-pl>0?'+':''}¥${(ac-pl).toLocaleString('ja-JP')}`;
+}
+function openOps(tab){
+  if(!S.project){ toast('先にプロジェクトを開いてください'); return; }
+  const t=tab||'act';
+  $$('[data-ops]').forEach(b=>b.classList.toggle('on', b.dataset.ops===t));
+  $$('.opspane').forEach(p=>p.classList.toggle('on', p.dataset.opp===t));
+  ['act','sch','bud','str'].forEach(renderOps);
+  $('#opsModal').classList.add('on');
+}
+/* AIに渡す文 */
+function opsBlocks(){
+  const p=S.project||{}; let out='';
+  const acts=(p.actions||[]).filter(r=>r.what).slice(-8);
+  if(acts.length) out+=`━━━ 直近の施策と反応 ━━━\n`+acts.map(r=>`${r.d||'日付なし'}｜${({all:'全体',ig:'Instagram',x:'X',tt:'TikTok',yt:'YouTube'})[r.ch||'all']}｜${r.what}${r.res?` → ${r.res}`:''}`).join('\n')+`\n━━━━━━━━━━━━━━━\n\n`;
+  const sch=(p.schedule||[]).filter(r=>r.task&&!r.done).sort((a,b)=>String(a.d).localeCompare(String(b.d))).slice(0,10);
+  if(sch.length) out+=`━━━ 締切・スケジュール（未完了） ━━━\n`+sch.map(r=>`${r.d||'期限未定'}｜${r.task}${r.owner?`（担当：${r.owner}）`:''}`).join('\n')+`\n※期限に触れるときは、必ずこの日付を使ってください。\n━━━━━━━━━━━━━━━━━━━\n\n`;
+  const bud=(p.budget||[]).filter(r=>r.name);
+  if(bud.length){
+    const pl=bud.reduce((x,r)=>x+(Number(r.plan)||0),0), ac=bud.reduce((x,r)=>x+(Number(r.actual)||0),0);
+    out+=`━━━ 予算と実績（円） ━━━\n`+bud.map(r=>`${r.name}：予算 ${Number(r.plan||0).toLocaleString('ja-JP')} / 実績 ${r.actual?Number(r.actual).toLocaleString('ja-JP'):'—'}${r.note?`（${r.note}）`:''}`).join('\n')
+      +`\n合計：予算 ${pl.toLocaleString('ja-JP')} / 実績 ${ac.toLocaleString('ja-JP')}\n※金額の話をするときは、この数字を根拠にしてください。\n━━━━━━━━━━━━━━\n\n`;
+  }
+  const str=(p.streaming||[]).filter(r=>r.listeners||r.note).slice(-3);
+  if(str.length) out+=`━━━ 配信の数値（Spotify等） ━━━\n`+str.map(r=>`${r.d||''}｜月間リスナー ${r.listeners?Number(r.listeners).toLocaleString('ja-JP'):'—'}${r.note?`｜${r.note}`:''}`).join('\n')+`\n━━━━━━━━━━━━━━━━━━\n\n`;
+  return out;
+}
+
+/* ---------- 推移グラフ ---------- */
+const TREND_COLORS={ig:'#E4708A', x:'#CFC7B6', tt:'#4FD1C5', yt:'#E0A32E'};
+function trendSvg(){
+  const st=statsAll();
+  const keys=['ig','x','tt','yt'].filter(k=>st[k].length>0);
+  if(!keys.length) return '<p style="color:var(--dim);font-size:13px">まだ記録がありません。数字を取得または入力すると、その日付とともに記録されます。</p>';
+
+  const dates=[...new Set(keys.flatMap(k=>st[k].map(p=>p.d)))].sort();
+  const t0=new Date(dates[0]).getTime(), t1=new Date(dates[dates.length-1]).getTime();
+  const span=Math.max(1, t1-t0);
+  const vals=keys.flatMap(k=>st[k].map(p=>p.n));
+  const vmax=Math.max(...vals), vmin=Math.min(...vals);
+  const lo=Math.max(0, vmin-(vmax-vmin||vmax*0.1)*0.15), hi=vmax+(vmax-vmin||vmax*0.1)*0.15;
+  const W=700,H=300,L=64,R=16,T=16,B=40;
+  const x=d=>L+((new Date(d).getTime()-t0)/span)*(W-L-R);
+  const y=v=>T+(1-(v-lo)/((hi-lo)||1))*(H-T-B);
+
+  let g='';
+  // 目盛
+  for(let i=0;i<=4;i++){
+    const v=lo+(hi-lo)*i/4, yy=y(v);
+    g+=`<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="#3B362B" stroke-width="1"/>`;
+    g+=`<text x="${L-8}" y="${yy+4}" text-anchor="end" fill="#8B8271" font-size="10" font-family="monospace">${Math.round(v).toLocaleString('en-US')}</text>`;
+  }
+  // 日付ラベル
+  const labs=dates.length<=4?dates:[dates[0],dates[Math.floor(dates.length/2)],dates[dates.length-1]];
+  labs.forEach(d=>{ g+=`<text x="${x(d)}" y="${H-B+20}" text-anchor="middle" fill="#8B8271" font-size="10" font-family="monospace">${d.slice(5).replace('-','/')}</text>`; });
+
+  // 施策ログを縦線で重ねる
+  const acts=((S.project&&S.project.actions)||[]).filter(a=>a.d && a.what
+    && new Date(a.d).getTime()>=t0-86400000 && new Date(a.d).getTime()<=t1+86400000);
+  acts.forEach((a,i)=>{
+    const xx=x(a.d);
+    g+=`<line x1="${xx.toFixed(1)}" y1="${T}" x2="${xx.toFixed(1)}" y2="${H-B}" stroke="#6d6450" stroke-width="1" stroke-dasharray="3 3"/>`;
+    const lab=(a.what||'').slice(0,12);
+    g+=`<text x="${(xx+3).toFixed(1)}" y="${T+11+((i%3)*11)}" fill="#a89f8c" font-size="9">${lab.replace(/[<>&]/g,'')}</text>`;
+  });
+
+  keys.forEach(k=>{
+    const pts=st[k].map(p=>`${x(p.d).toFixed(1)},${y(p.n).toFixed(1)}`).join(' ');
+    g+=`<polyline points="${pts}" fill="none" stroke="${TREND_COLORS[k]}" stroke-width="2" stroke-linejoin="round"/>`;
+    st[k].forEach(p=>{ g+=`<circle cx="${x(p.d).toFixed(1)}" cy="${y(p.n).toFixed(1)}" r="3" fill="${TREND_COLORS[k]}"/>`; });
+  });
+
+  const legend=keys.map(k=>{
+    const cur=latestStat(k), pr=prevStat(k);
+    const diff=pr? cur.n-pr.n : null;
+    const dtxt=diff===null?'':` <span style="color:${diff>0?'#7FBF6A':(diff<0?'#E8867C':'#8B8271')}">${diff>0?'+':''}${diff.toLocaleString('ja-JP')}</span>`;
+    return `<span style="display:inline-flex;align-items:center;gap:6px;margin-right:16px;font-size:12px">
+      <i style="width:14px;height:3px;background:${TREND_COLORS[k]};display:inline-block"></i>
+      ${SNSKEY[k].name} <b style="font-family:var(--font-lab)">${num(cur.n)}</b>${dtxt}</span>`;
+  }).join('');
+
+  return `<div style="margin-bottom:12px">${legend}</div>
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;background:#16140F;border:1px solid var(--line)">${g}</svg>
+    <p style="color:var(--dim);font-size:11.5px;margin-top:10px">取得または入力した日付だけを点として結んでいます。破線は「運営データ」に登録した施策の日付です。山や谷が何によるものかを照らし合わせてください。</p>`;
+}
+$('#btnTrend').onclick=()=>{
+  if(!S.project){ toast('先にプロジェクトを開いてください'); return; }
+  $('#trendBody').innerHTML=trendSvg();
+  $('#trendModal').classList.add('on');
+};
+$('#btnTrendClose').onclick=()=>$('#trendModal').classList.remove('on');
+
+$('#btnAllFollowers').onclick=fetchAllFollowers;
+$('#btnReport').onclick=()=>{
+  let head='';
+  if(LAST.mode==='proxy') head='【SocialBladeのページを直接読み取りました】\n';
+  else if(LAST.mode==='search') head = LAST.grounded
+    ? '【ウェブ検索：実行されました】\n'+(LAST.sources.length?'参照：'+LAST.sources.join(' / ')+'\n':'')
+    : '【ウェブ検索：働いていません。以下はAIの記憶の可能性が高いです】\n';
+  $('#reportBody').textContent = LAST.report
+    ? head+'\n'+LAST.report + (LAST.raw?'\n\n--- 抽出結果 ---\n'+LAST.raw:'')
+    : 'まだ調査していません。「自動取得」か「4つまとめて取得」を押してください。';
+  $('#reportModal').classList.add('on');
+};
+$('#btnReportClose').onclick=()=>$('#reportModal').classList.remove('on');
+
+function openRates(){
+  $('#freeMode').checked=S.cost.freeMode;
+  $('#fxRate').value=S.cost.fx; $('#dayLimit').value=S.cost.limit; $('#rateDate').value=S.cost.date;
+  const names=[...new Set(Object.keys(S.cost.rates).concat(S.ais.map(a=>a.model)))].filter(Boolean).sort();
+  const tb=$('#rateRows'); tb.innerHTML='';
+  names.forEach(n=>{
+    const r=S.cost.rates[n]||{i:null,o:null};
+    const used=S.ais.some(a=>a.model===n);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="mn">${used?'● ':''}${n}</td>
+      <td><input type="number" step="0.01" data-rate-in="${n}" value="${r.i??''}"></td>
+      <td><input type="number" step="0.01" data-rate-out="${n}" value="${r.o??''}"></td>`;
+    tb.appendChild(tr);
+  });
+  const d=costDay();
+  $('#rateNote').textContent = `本日：送信${d.ch.reduce((a,c)=>a+c.req,0)}回 / 入力${d.ch.reduce((a,c)=>a+c.i,0).toLocaleString()}tok / 出力${d.ch.reduce((a,c)=>a+c.o,0).toLocaleString()}tok / ${S.cost.freeMode?'¥0（無料枠）':fmtYen(dayYen())}`
+    + (d.unknown.length? `　※単価未設定：${d.unknown.join(', ')}`:'');
+  $('#rateModal').classList.add('on');
+}
+$('#btnRates').onclick=openRates;
+$('#btnRateClose').onclick=()=>$('#rateModal').classList.remove('on');
+$('#btnRateSave').onclick=()=>{
+  S.cost.freeMode=$('#freeMode').checked;
+  S.cost.fx=parseFloat($('#fxRate').value)||150;
+  S.cost.limit=parseFloat($('#dayLimit').value)||0;
+  S.cost.date=$('#rateDate').value.trim();
+  $$('[data-rate-in]').forEach(inp=>{
+    const n=inp.dataset.rateIn;
+    const o=document.querySelector(`[data-rate-out="${CSS.escape(n)}"]`);
+    const vi=inp.value===''?null:parseFloat(inp.value);
+    const vo=(!o||o.value==='')?null:parseFloat(o.value);
+    S.cost.rates[n]={i:vi,o:vo};
+  });
+  S.cost.override=false;
+  saveLocal(); updateCostUI(); $('#rateModal').classList.remove('on'); toast('料金設定を保存しました');
+};
+$('#btnRateReset').onclick=()=>{
+  if(!confirm('本日の集計を0に戻します。よろしいですか？')) return;
+  S.cost.day={date:today(),ch:blankCh(),unknown:[]}; S.cost.override=false;
+  saveLocal(); updateCostUI(); openRates(); toast('本日の集計をリセットしました');
+};
+$('#gkey').oninput=e=>{ S.gkey=e.target.value.trim(); saveLocal(); };
+$('#btnAllGemini').onclick=()=>{
+  S.ais.forEach(a=>{ a.provider='gemini'; if(!/^gemini/.test(a.model)) a.model=PROVIDERS.gemini.model; });
+  renderChannels(); saveLocal(); toast('3つの窓をGeminiにしました');
+};
+async function fetchGeminiModels(key){
+  const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?key='+encodeURIComponent(key)+'&pageSize=200');
+  const j=await r.json();
+  if(!r.ok) throw new Error(j.error?.message||'取得エラー');
+  const bad=/embedding|aqa|imagen|image|veo|tts|audio|live|learnlm|gemma/i;
+  S.gmodels=(j.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes('generateContent'))
+    .map(m=>m.name.replace(/^models\//,'')).filter(n=>!bad.test(n)).sort();
+  fillModelList(); saveLocal();
+  return S.gmodels;
+}
+function pickModel(kind){
+  const L=S.gmodels; if(!L.length) return '';
+  const order = kind==='light' ? [/flash-lite/, /flash/, /pro/] : [/pro/, /flash(?!-lite)/, /flash/];
+  const stable = L.filter(n=>!/preview|exp|latest/i.test(n));
+  for(const src of [stable, L]) for(const re of order){
+    const hit = src.filter(n=>re.test(n)).sort().reverse()[0];
+    if(hit) return hit;
+  }
+  return L[0];
+}
+$('#btnModels').onclick=async()=>{
+  if(!S.gkey){ toast('先にGemini APIキーを貼り付けてください'); return; }
+  wait(true,'取得中','あなたのキーで今すぐ使えるモデルを調べています。');
+  try{
+    await fetchGeminiModels(S.gkey);
+    S.ais.forEach((a,i)=>{
+      if(a.provider!=='gemini') return;
+      if(!S.gmodels.includes(a.model)) a.model = pickModel(i===2?'light':'main');
+    });
+    renderChannels(); saveLocal(); wait(false);
+    toast(`使えるモデル${S.gmodels.length}件。各窓のモデル名を自動で合わせました`);
+  }catch(e){ wait(false); toast('取得に失敗しました：'+e.message); }
+};
+function fillModelList(){
+  const dl=$('#modelList'); if(!dl) return; dl.innerHTML='';
+  (S.gmodels.length?S.gmodels:['gemini-3.6-flash','gemini-3.5-flash-lite','gemini-3.5-flash'])
+    .forEach(m=>{ const o=document.createElement('option'); o.value=m; dl.appendChild(o); });
+}
+$('#btnUserSend').onclick=userSend;
+$('#btnBrief').onclick=briefAll;
+$('#btnTurn1').onclick=()=>runTurns(1);
+$('#btnTurn3').onclick=()=>runTurns(3);
+$('#btnStop').onclick=()=>{ RUN.stop=true; toast('このターンの発言が終わったら止まります'); };
+$('#btnViewCharter').onclick=$('#btnCharterOpen').onclick=()=>{ $('#charterText').value=S.project?.charter||''; $('#charterModal').classList.add('on'); };
+$('#btnCharterClose').onclick=()=>$('#charterModal').classList.remove('on');
+$('#btnCharterBridge').onclick=()=>{ $('#charterModal').classList.remove('on'); openBridge('charter'); };
+$('#btnCharterSave').onclick=async()=>{
+  S.project.charter=$('#charterText').value;
+  if(S.mode==='fs'&&S.projDirHandle){ await writeFile(S.projDirHandle,'憲章.md',S.project.charter);
+    await writeFile(S.projDirHandle,'project.json',JSON.stringify(S.project,null,2)); } else saveLocal();
+  $('#charterModal').classList.remove('on'); toast('憲章を保存しました');
+};
+$('#btnCharterRegen').onclick=()=>{
+  wizError('');
+  W.data={name:S.project.name,profile:S.project.profile||'',hp:S.project.hp||'',
+    ig:S.project.sns?.ig||'',tt:S.project.sns?.tt||'',yt:S.project.sns?.yt||'',x:S.project.sns?.x||'',
+    ng:S.project.ng||'',must:S.project.must||''};
+  $('#charterModal').classList.remove('on'); show('s-wiz'); wizFill(); wizGo(5);
+};
+['ig','x','tt','yt'].forEach(k=>{ $('#i-'+k).oninput=e=>$('#m-'+k).textContent=num(e.target.value); });
+$$('#meters input').forEach(inp=>{ inp.onchange=e=>{
+  const k=e.target.id.replace('i-',''); const n=Number(String(e.target.value).replace(/[^\d]/g,''));
+  if(n && S.project){ setFollower(k,n); saveProjectQuiet(); }
+}; });
+$('#d-agenda').oninput=e=>S.agendaTitle=e.target.value;
+
+document.addEventListener('input', e=>{
+  const t=e.target, i=t.dataset.model!==undefined?+t.dataset.model:(t.dataset.key!==undefined?+t.dataset.key:(t.dataset.role!==undefined?+t.dataset.role:null));
+  if(i===null||isNaN(i)) return;
+  if(t.dataset.model!==undefined) S.ais[i].model=t.value;
+  if(t.dataset.key!==undefined) S.ais[i].key=t.value.trim();
+  if(t.dataset.role!==undefined){ S.ais[i].role=t.value; updateTape(i); }
+  saveLocal();
+});
+document.addEventListener('change', e=>{
+  if(e.target.dataset.temp!==undefined){
+    const i=+e.target.dataset.temp; S.ais[i].temp=parseFloat(e.target.value); saveLocal(); return;
+  }
+  if(e.target.dataset.prov!==undefined){
+    const i=+e.target.dataset.prov; S.ais[i].provider=e.target.value; S.ais[i].model=PROVIDERS[e.target.value].model;
+    const mi=document.querySelector(`[data-model="${i}"]`); if(mi) mi.value=S.ais[i].model;
+    updateTape(i); saveLocal();
+  }
+});
+document.addEventListener('click', async e=>{
+  const ot=e.target.closest('[data-ops]');
+  if(ot){ openOps(ot.dataset.ops); return; }
+  const ar=e.target.closest('[data-addrow]');
+  if(ar){ const t=ar.dataset.addrow;
+    const row={}; if(OPSDEF[t].cols[0].k==='d') row.d=stampNow().date;
+    if(t==='act') row.ch='all';
+    opsArr(t).push(row); renderOps(t); return; }
+  const b=e.target.closest('[data-host]');
+  if(b){ S.hostIndex=+b.dataset.host; S.ais[S.hostIndex].on=true; S.ais.forEach((a,i)=>updateTape(i)); saveLocal(); toast(`CH0${S.hostIndex+1} をホストにしました`); return; }
+  const ob=e.target.closest('[data-on]');
+  if(ob){ const i=+ob.dataset.on;
+    if(i===S.hostIndex){ toast('ホストは休止にできません。先に別の窓のランプを押してホストを移してください'); return; }
+    S.ais[i].on=!S.ais[i].on; updateTape(i); saveLocal(); return; }
+  const bt=e.target.closest('[data-btask]');
+  if(bt){ openBridge(bt.dataset.btask); return; }
+  const op=e.target.closest('[data-open]');
+  if(op){ window.open(op.dataset.open,'_blank','noopener'); return; }
+  const ff=e.target.closest('[data-fetch]');
+  if(ff){ await fetchFollower(ff.dataset.fetch); return; }
+  const s=e.target.closest('[data-send]');
+  if(s){ const i=+s.dataset.send; const box=document.querySelector(`[data-compose="${i}"]`);
+    const t=box.value.trim(); if(!t) return; box.value=''; S.log.push({who:'オーナー→'+(S.ais[i].role||('CH0'+(i+1))),text:t,at:stampNow().time}); await sendTo(i,t,[]); }
+});
+
+const ub=$('#userBox');
+['dragenter','dragover'].forEach(ev=>ub.addEventListener(ev,e=>{e.preventDefault();ub.classList.add('drag');}));
+['dragleave','drop'].forEach(ev=>ub.addEventListener(ev,e=>{e.preventDefault();ub.classList.remove('drag');}));
+ub.addEventListener('drop', async e=>{
+  const files=[...(e.dataTransfer?.files||[])];
+  for(const f of files){
+    if(f.type.startsWith('image/')) S.images.push(await readImage(f));
+    else if(f.type.startsWith('text/')||/\.(md|txt|csv|json)$/i.test(f.name)){
+      const txt=await f.text(); $('#u-text').value += `\n\n【添付：${f.name}】\n${txt.slice(0,20000)}`;
+    } else toast(`${f.name} は画像かテキストにしてください`);
+  }
+  renderThumbs();
+});
+$('#btnAttach').onclick=()=>$('#fileIn').click();
+$('#fileIn').onchange=async e=>{
+  for(const f of [...e.target.files]){
+    if(f.type.startsWith('image/')) S.images.push(await readImage(f));
+    else { const txt=await f.text(); $('#u-text').value += `\n\n【添付：${f.name}】\n${txt.slice(0,20000)}`; }
+  }
+  renderThumbs(); e.target.value=''; toast('資料を添付しました');
+};
+$('#u-text').addEventListener('keydown', e=>{ if((e.metaKey||e.ctrlKey)&&e.key==='Enter') userSend(); });
+
+/* ---------- 異常の可視化 ---------- */
+window.addEventListener('error', e=>{
+  const b=document.getElementById('errBanner');
+  if(b){ b.style.display='block';
+    b.textContent='アプリ内でエラーが起きました：'+(e.message||'')+' ／ この行より後のボタンが効かなくなっている可能性があります'; }
+});
+
+/* =====================================================================
+   端末間のやりとり（iCloud Drive経由）
+   ===================================================================== */
+function projectBundle(){
+  const p=S.project;
+  return {format:'aikaigi-project', version:1, exportedAt:stampNow().iso, project:p};
+}
+async function exportProject(){
+  if(!S.project){ toast('先にプロジェクトを開いてください'); return; }
+  S.project.updated=stampNow().iso;
+  const name=`AI会議_${safeName(S.project.name)}.json`;
+  const text=JSON.stringify(projectBundle(),null,2);
+  if(S.mode==='fs' && S.projDirHandle){
+    try{ await writeFile(S.projDirHandle, name, text); }catch(e){}
+  }
+  download(name, text);
+  $('#syncNote').textContent=`${name} を書き出しました。iCloud Driveの「AI会議」フォルダに入れておくと、iPhoneから読み込めます。`;
+  toast('書き出しました');
+}
+function mergeArr(a,b,keyFn){
+  const out=[...(a||[])];
+  (b||[]).forEach(x=>{ if(!out.some(y=>keyFn(y)===keyFn(x))) out.push(x); });
+  return out;
+}
+function mergeProject(local, incoming){
+  if(!local) return incoming;
+  const newer = (incoming.updated||'') > (local.updated||'') ? incoming : local;
+  const older = newer===incoming ? local : incoming;
+  const m = Object.assign({}, older, newer);   // 単純な項目は新しいほうを採用
+  // 履歴系は取りこぼさないよう合成する
+  m.stats={};
+  ['ig','x','tt','yt'].forEach(k=>{
+    const merged=mergeArr((local.stats||{})[k], (incoming.stats||{})[k], r=>r.d)
+      .sort((a,b)=>String(a.d).localeCompare(String(b.d)));
+    m.stats[k]=merged;
+  });
+  m.decisions = mergeArr(
+    Array.isArray(local.decisions)?local.decisions:[],
+    Array.isArray(incoming.decisions)?incoming.decisions:[], r=>`${r.d}|${r.agenda}`);
+  ['actions','schedule','budget','streaming','agendas'].forEach(k=>{
+    m[k]=mergeArr(local[k], incoming[k], r=>JSON.stringify(r));
+  });
+  // 外部共有メモは両方残す
+  const le=(local.external||'').trim(), ie=(incoming.external||'').trim();
+  m.external = le===ie ? le : [le,ie].filter(Boolean).join('\n');
+  return m;
+}
+async function importProject(file){
+  try{
+    const j=JSON.parse(await file.text());
+    const inc = j.project || j;
+    if(!inc || !inc.name) throw new Error('プロジェクトのファイルではないようです');
+    // 同名のプロジェクトがあれば合成
+    let local=null;
+    if(S.mode==='fs' && S.rootHandle){
+      try{
+        const dh=await S.rootHandle.getDirectoryHandle(inc.dirName||safeName(inc.name),{create:true});
+        const t=await readFile(dh,'project.json'); if(t) local=JSON.parse(t);
+        S.projDirHandle=dh;
+      }catch(e){}
+    } else {
+      local=S.projects.find(p=>p.name===inc.name)||null;
+    }
+    const merged=mergeProject(local, inc);
+    merged.dirName=merged.dirName||safeName(merged.name);
+    S.project=merged;
+    if(S.mode==='fs' && S.projDirHandle){
+      await writeFile(S.projDirHandle,'project.json',JSON.stringify(merged,null,2));
+      if(merged.charter) await writeFile(S.projDirHandle,'憲章.md',merged.charter);
+      await scanProjects();
+    } else {
+      S.projects=S.projects.filter(p=>p.name!==merged.name); S.projects.unshift(merged); saveLocal();
+    }
+    renderProjects();
+    $('#syncNote').textContent=`「${merged.name}」を取り込みました。${local?'既存のデータと合成しています（記録は消えていません）。':''}`;
+    toast('取り込みました');
+  }catch(e){ $('#syncNote').textContent='取り込めませんでした：'+e.message; toast('取り込みに失敗しました'); }
+}
+$('#btnExport').onclick=exportProject;
+$('#btnImport').onclick=()=>$('#impIn').click();
+$('#impIn').onchange=e=>{ const f=e.target.files[0]; if(f) importProject(f); e.target.value=''; };
+
+/* ---------- 起動 ---------- */
+(async function init(){
+  loadLocal();
+  if(FS_OK){ const saved=await idbGet('root'); if(saved) $('#btnResume').style.display='inline-block'; }
+  else { S.mode='local'; }
+  if(S.usage.date!==stampNow().date) S.usage={date:stampNow().date,count:0};
+  $('#gkey').value=S.gkey; $('#usageNum').textContent=S.usage.count;
+  fillModelList(); fillHostSelect(); costDay(); updateCostUI();
+  renderRoot();
+})();
+</script>
+</body>
+</html>
